@@ -98,6 +98,7 @@ button:hover {
 
 body .head {
   font-family: Arial, sans-serif;
+  display: block;
   background-color: #f4f4f4;
   text-align: center;
 }
