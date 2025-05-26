@@ -71,7 +71,7 @@ if (loginForm) {
         const user = userCredential.user;
         if (uidField) uidField.value = user.uid;
         alert(`Halo, Anda berhasil login dengan akun: ${email}`);
-        // window.location.href = "dashboard.html"; // Bisa diarahkan ke dashboard
+        window.location.href = "dashboard.html"; // Bisa diarahkan ke dashboard
       })
       .catch((error) => {
         let message = "Gagal Login: ";
