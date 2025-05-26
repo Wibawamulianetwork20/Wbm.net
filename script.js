@@ -13,12 +13,14 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+console.log("Script.js berhasil dimuat");
 
 // =========== Register ===========
 const registerForm = document.getElementById('register-form');
 if (registerForm) {
   registerForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    console.log("Register berhasil dimuat");
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -47,6 +49,7 @@ const uidField = document.getElementById('id');
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    console.log("Login berhasil dimuat");
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
