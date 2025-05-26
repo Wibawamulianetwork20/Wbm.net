@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>e-Billing System</h1>
+    <p>Selamat datang di Dashboard</p>
+  </header>
+
+  <main>
+    <div class="dashboard">
+      <div class="card green">
+        <h3>Total Pelanggan</h3>
+        <p id="totalPelanggan">0</p>
+      </div>
+
+      <div class="card blue">
+        <h3>Pelanggan Lunas</h3>
+        <p id="pelangganLunas">0</p>
+      </div>
+
+      <div class="card red">
+        <h3>Pelanggan Belum Lunas</h3>
+        <p id="pelangganBelumLunas">0</p>
+      </div>
+
+      <div class="card yellow">
+        <h3>Total Pemasukan</h3>
+        <p id="totalPemasukan">Rp 0</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
