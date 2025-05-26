@@ -34,10 +34,26 @@ if (registerForm) {
         });
       })
       .then(() => {
-        alert("Registrasi berhasil! Silakan login.");
+        alert(`Registrasi berhasil dengan email: ${email}\nSilakan login di halaman Login.`);
         window.location.href = "login.html";
       })
-      .catch(err => alert("Error: " + err.message));
+      .catch(err => {
+        let message = "Gagal Registrasi: ";
+        switch (err.code) {
+          case 'auth/email-already-in-use':
+            message += "Email sudah terdaftar. Silakan login atau gunakan email lain.";
+            break;
+          case 'auth/invalid-email':
+            message += "Format email tidak valid. Gunakan email yang benar.";
+            break;
+          case 'auth/weak-password':
+            message += "Password terlalu lemah. Gunakan minimal 6 karakter.";
+            break;
+          default:
+            message += err.message;
+        }
+        alert(message);
+      });
   });
 }
 
@@ -54,24 +70,23 @@ if (loginForm) {
       .then((userCredential) => {
         const user = userCredential.user;
         if (uidField) uidField.value = user.uid;
-        alert("Login berhasil!");
-        // Redirect ke dashboard jika mau
-        // window.location.href = "dashboard.html";
+        alert(`Halo, Anda berhasil login dengan akun: ${email}`);
+        // window.location.href = "dashboard.html"; // Bisa diarahkan ke dashboard
       })
       .catch((error) => {
-        let message = "Login gagal: ";
+        let message = "Gagal Login: ";
         switch (error.code) {
           case 'auth/user-not-found':
-            message += "Email tidak terdaftar.";
+            message += "Email tidak ditemukan. Silakan daftar terlebih dahulu.";
             break;
           case 'auth/wrong-password':
-            message += "Password salah.";
+            message += "Password salah. Silakan periksa dan coba lagi.";
             break;
           case 'auth/invalid-email':
-            message += "Format email tidak valid.";
+            message += "Format email tidak valid. Gunakan email yang benar.";
             break;
           case 'auth/too-many-requests':
-            message += "Terlalu banyak percobaan login. Coba lagi nanti.";
+            message += "Terlalu banyak percobaan login. Coba lagi beberapa saat.";
             break;
           default:
             message += error.message;
