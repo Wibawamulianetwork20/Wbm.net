@@ -52,29 +52,35 @@
     let no = 1;
     let dataPelanggan = [];
 
-    db.ref("pelangganlunas").once("value").then(snapshot => {
-      snapshot.forEach(childSnapshot => {
-        const data = childSnapshot.val();
-        const id = childSnapshot.key;
-        dataPelanggan.push(`
-          <tr>
-            <td>${no++}</td>
-            <td>${data.nama || ''}</td>
-            <td>${data.paket || ''}</td>
-            <td>${data.keterangan || ''}</td>
-            <td>Rp ${data.harga || '0'}</td>
-            <td>
-              <button class="aksi-btn hapus" onclick="kembalikanPelanggan('${id}')">Kembalikan</button>
-            </td>
-          </tr>
-        `);
-        totalHarga += parseInt(data.harga) || 0;
-      });
+    // Mendapatkan data dari pelangganlunas
+db.ref('pelangganlunas').once('value')
+  .then(snapshot => {
+    let no = 1;
+    let dataPelanggan = [];
+    snapshot.forEach(childSnapshot => {
+      let id = childSnapshot.key;
+      let data = childSnapshot.val();
+      dataPelanggan.push(`
+        <tr>
+          <td>${no++}</td>
+          <td>${data.nama || ''}</td>
+          <td>${data.paket || ''}</td>
+          <td>${data.keterangan || ''}</td>
+          <td>Rp ${data.harga || '0'}</td>
+          <td>
+            <button class="aksi-btn hapus" onclick="hapusLunas('${id}')">Hapus</button>
+          </td>
+        </tr>
+      `);
+    });
 
-      document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
-      document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
-
-      $('#tabelPelanggan').DataTable({
+    document.querySelector('#tabelPelangganLunas tbody').innerHTML = dataPelanggan.join('');
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Gagal mengambil data: ' + err.message);
+  });
+      $('#tabelPelangganlunas').DataTable({
         pageLength: 25,
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]]
       });
