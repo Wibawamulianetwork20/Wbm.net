@@ -52,13 +52,14 @@
 
     // Ambil Data Pelanggan dari Firebase
     // Ambil Data Pelanggan
-db.collection("pelanggan").get().then((querySnapshot) => {
-  let dataPelanggan = [];
-  let totalHarga = 0;
-  let no = 1;
+let totalHarga = 0;
+let no = 1;
 
-  querySnapshot.forEach(doc => {
-    const data = doc.data();
+db.ref("pelanggan").once("value").then((snapshot) => {
+  let dataPelanggan = [];
+
+  snapshot.forEach((childSnapshot) => {
+    const data = childSnapshot.val();
     dataPelanggan.push(`
       <tr>
         <td>${no++}</td>
@@ -74,7 +75,6 @@ db.collection("pelanggan").get().then((querySnapshot) => {
   document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
   document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
 
-  // Inisialisasi DataTables hanya sekali
   $('#tabelPelanggan').DataTable({
     pageLength: 25,
     lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
