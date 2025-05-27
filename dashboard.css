@@ -54,19 +54,19 @@ main {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
-.card h3 {
+h3 {
   font-size: 1.3rem;
   margin-bottom: 10px;
   color: #444;
 }
 
-.card p {
+p {
   font-size: 2rem;
   font-weight: bold;
   margin: 15px 0;
 }
 
-.card a {
+a {
   text-decoration: none;
   background: #1976D2;
   color: white;
@@ -78,24 +78,24 @@ main {
   transition: background 0.3s;
 }
 
-.card a:hover {
+a:hover {
   background: #1565C0;
 }
 
 /* Card Warna */
-.card.green {
+.card green {
   border-left: 6px solid #4CAF50;
 }
 
-.card.blue {
+.card blue {
   border-left: 6px solid #2196F3;
 }
 
-.card.red {
+.card red {
   border-left: 6px solid #F44336;
 }
 
-.card.yellow {
+.card yellow {
   border-left: 6px solid #FFC107;
   color: #333;
 }
