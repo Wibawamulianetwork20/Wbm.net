@@ -49,44 +49,45 @@
     const db = firebase.database();
 
     // Mendapatkan data dari pelangganlunas
-db.ref('pelangganlunas').once('value')
-  .then(snapshot => {
+function loadPelangganLunas() {
+  const tbody = document.querySelector('#pelangganlunas tbody');
+  db.ref('pelangganlunas').once('value', (snapshot) => {
+    let data = '';
     let no = 1;
-    let dataPelanggan = [];
-    snapshot.forEach(childSnapshot => {
-      let id = childSnapshot.key;
-      let data = childSnapshot.val();
-      dataPelanggan.push(`
-  <tr>
-    <td>${no++}</td>
-    <td>${data.nama || ''}</td>
-    <td>${data.paket || ''}</td>
-    <td>${data.keterangan || ''}</td>
-    <td>Rp ${data.harga || '0'}</td>
-    <td>
-      <button class="aksi-btn hapus" onclick="kembalikanPelanggan('${id}')">Kembalikan</button>
-    </td>
-  </tr>
-`);
+    snapshot.forEach(child => {
+      const pelanggan = child.val();
+      data += `
+        <tr>
+          <td>${no++}</td>
+          <td>${pelanggan.nama}</td>
+          <td>${pelanggan.paket}</td>
+          <td>${pelanggan.keterangan}</td>
+          <td>Rp ${pelanggan.harga}</td>
+          <td><button onclick="kembalikanPelanggan('${child.key}')">Kembalikan</button></td>
+        </tr>
+      `;
     });
-
-    document.querySelector('#pelangganlunas tbody').innerHTML = dataPelanggan.join('');
-  })
-  .catch(err => {
-    console.error(err);
-    alert('Gagal mengambil data: ' + err.message);
+    tbody.innerHTML = data;
+  }, (error) => {
+    alert('Gagal mengambil data: ' + error.message);
   });
+}
 
-    function kembalikanPelanggan(id) {
-      db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
-        const data = snapshot.val();
-        db.ref('pelanggan/' + id).set(data).then(() => {
-          db.ref('pelangganlunas/' + id).remove();
-          alert("Data pelanggan berhasil dikembalikan!");
-          location.reload();
-        });
-      });
-    }
+function kembalikanPelanggan(id) {
+  const refLunas = db.ref('pelangganlunas/' + id);
+  refLunas.once('value').then(snapshot => {
+    const data = snapshot.val();
+    db.ref('pelanggan/' + id).set(data, (err) => {
+      if (!err) {
+        refLunas.remove();
+        alert('Data dikembalikan ke pelanggan aktif');
+        loadPelangganLunas();
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', loadPelangganLunas);
   </script>
 </body>
 </html>
