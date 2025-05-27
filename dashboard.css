@@ -29,6 +29,10 @@ main {
   padding: 2rem;
 }
 
+main a {
+  color: white;
+  font-style: none;
+
 .dashboard {
   display: flex;
   flex-wrap: wrap;
