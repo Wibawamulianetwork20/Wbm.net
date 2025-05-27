@@ -3,12 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Pelanggan & Upload JSON</title>
+  <title>Data Pelanggan</title>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="data_pelanggan.css" type="text/css" media="all" />
 </head>
 <body>
   <h2>Data Pelanggan</h2>
+
+  <input type="file" id="jsonFile" accept=".json" />
+  <button class="btn btn-upload" onclick="uploadData()" id="uploadBtn">Upload JSON</button>
+  <button class="btn btn-hapus-duplikat" onclick="hapusDuplikat()">Hapus Data Duplikat</button>
 
   <table id="tabelPelanggan" class="display">
     <thead>
@@ -18,35 +22,23 @@
         <th>Paket</th>
         <th>Keterangan</th>
         <th>Harga</th>
-        <th>aksi</th>
+        <th>Aksi</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <div class="total">
+  <div>
     Total Harga: <span id="totalHarga">Rp 0</span>
   </div>
 
-  <div class="upload-box" id="uploadBox">
-    <div class="upload-header">
-      <h2>Upload Data JSON Pelanggan</h2>
-      <button id="hideUpload">×</button>
-    </div>
-    <input type="file" id="jsonFile" accept=".json" />
-    <button onclick="uploadData()">Upload JSON</button>
-  </div>
-
-  <button id="showUpload">+ Tambah Data JSON</button>
-
-  <!-- Scripts -->
+  <!-- Firebase + Scripts -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <script>
-    // Firebase Config (Ganti dengan milikmu)
     const firebaseConfig = {
       apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
       authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -56,15 +48,47 @@
       messagingSenderId: "605020393823",
       appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
       measurementId: "G-9EWJE8F5FG"
-};
+    };
 
-firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Upload JSON ke Realtime Database
-        // Upload JSON
+    let totalHarga = 0;
+    let no = 1;
+    let dataPelanggan = [];
+
+    db.ref("pelanggan").once("value").then(snapshot => {
+      snapshot.forEach(childSnapshot => {
+        const data = childSnapshot.val();
+        const id = childSnapshot.key;
+        dataPelanggan.push(`
+          <tr>
+            <td>${no++}</td>
+            <td>${data.nama || ''}</td>
+            <td>${data.paket || ''}</td>
+            <td>${data.keterangan || ''}</td>
+            <td>Rp ${data.harga || '0'}</td>
+            <td>
+              <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
+              <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
+              <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
+            </td>
+          </tr>
+        `);
+        totalHarga += parseInt(data.harga) || 0;
+      });
+
+      document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
+      document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+      $('#tabelPelanggan').DataTable({
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]]
+      });
+    });
+
     function uploadData() {
-      const file = document.getElementById("jsonFile").files[0];
+      const fileInput = document.getElementById("jsonFile");
+      const file = fileInput.files[0];
       if (!file) { alert("Pilih file JSON dulu!"); return; }
 
       const reader = new FileReader();
@@ -80,50 +104,46 @@ firebase.initializeApp(firebaseConfig);
           });
 
           Promise.all(uploadPromises)
-            .then(() => { alert("Data berhasil di-upload!"); location.reload(); })
+            .then(() => {
+              alert("Data berhasil di-upload! Upload hanya bisa sekali per halaman.");
+              document.getElementById("uploadBtn").disabled = true;
+              fileInput.disabled = true;
+              location.reload();
+            })
             .catch(err => alert("Gagal upload: " + err.message));
         } catch (err) {
-          alert("Format JSON salah: " + err.message);
+          alert("Format file JSON salah: " + err.message);
         }
       };
       reader.readAsText(file);
     }
 
-    // Tampilkan Data Pelanggan
-    let totalHarga = 0;
-    let no = 1;
-    let dataPelanggan = [];
+    function hapusDuplikat() {
+      if (confirm("Yakin ingin hapus semua data duplikat berdasarkan nama?")) {
+        db.ref('pelanggan').once('value').then(snapshot => {
+          let namaMap = {};
+          let hapusPromises = [];
 
-    db.ref("pelanggan").once("value").then((snapshot) => {
-      snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        const id = childSnapshot.key;
-        dataPelanggan.push(`
-          <tr>
-            <td>${no++}</td>
-            <td>${data.nama || ''}</td>
-            <td>${data.paket || ''}</td>
-            <td>${data.keterangan || ''}</td>
-            <td>Rp ${data.harga || '0'}</td>
-            <td>
-              <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
-              <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
-              <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
-              <button class="aksi-btn hapus-double" onclick="hapusDouble('${data.nama}')">Hapus Double</button>
-            </td>
-          </tr>
-        `);
-        totalHarga += parseInt(data.harga) || 0;
-      });
+          snapshot.forEach(child => {
+            const nama = child.val().nama;
+            const key = child.key;
 
-      document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
-      document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+            if (namaMap[nama]) {
+              hapusPromises.push(db.ref('pelanggan/' + key).remove());
+            } else {
+              namaMap[nama] = true;
+            }
+          });
 
-      $('#tabelPelanggan').DataTable({
-        pageLength: 25,
-        lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
-      });
-    });
+          Promise.all(hapusPromises).then(() => {
+            alert("Semua data duplikat berhasil dihapus!");
+            location.reload();
+          }).catch(err => {
+            alert("Gagal menghapus data duplikat: " + err.message);
+          });
+        });
+      }
+    }
 
     function bayarPelanggan(id) {
       db.ref('pelanggan/' + id).once('value').then(snapshot => {
@@ -159,20 +179,6 @@ firebase.initializeApp(firebaseConfig);
       if (confirm("Yakin ingin hapus data ini?")) {
         db.ref('pelanggan/' + id).remove().then(() => {
           alert("Data berhasil dihapus!");
-          location.reload();
-        });
-      }
-    }
-
-    function hapusDouble(nama) {
-      if (confirm(`Yakin ingin hapus semua data dengan nama "${nama}"?`)) {
-        db.ref('pelanggan').once('value').then(snapshot => {
-          snapshot.forEach(child => {
-            if (child.val().nama === nama) {
-              db.ref('pelanggan/' + child.key).remove();
-            }
-          });
-          alert("Semua data dengan nama sama berhasil dihapus!");
           location.reload();
         });
       }
