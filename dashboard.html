@@ -53,34 +53,20 @@
     appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
     measurementId: "G-9EWJE8F5FG"
   };
-
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  const database = firebase.database();
 
-  // Hitung total pelanggan dari Realtime Database
-  db.ref("pelanggan").once("value")
-    .then(snapshot => {
-      const total = snapshot.numChildren();
-      document.getElementById("totalPelanggan").innerText = total;
-    })
-    .catch(err => {
-      console.error(err);
-    });
-  function loadTotalPelangganLunas() {
-  const totalLunasEl = document.getElementById('totalPelangganLunas');
-  const dbLunas = firebase.database().ref('pelangganlunas');
-  
-  dbLunas.once('value', (snapshot) => {
-    let total = snapshot.size || snapshot.numChildren(); // cek size
-    totalLunasEl.textContent = total;
-  }).catch((error) => {
-    console.error('Gagal mengambil data:', error);
+  // Total pelanggan
+  database.ref('pelanggan').once('value').then(snapshot => {
+    const total = snapshot.size || snapshot.numChildren();
+    document.getElementById("totalPelanggan").innerText = total;
   });
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadTotalPelangganLunas();
-});
+  // Total pelanggan lunas
+  database.ref('pelangganlunas').once('value').then(snapshot => {
+    const totalLunas = snapshot.size || snapshot.numChildren();
+    document.getElementById("pelangganLunas").innerText = totalLunas;
+  });
 </script>
   
 </body>
