@@ -76,6 +76,11 @@ h2 {
   color: #004d40;
 }
 
+.aksi-btn { cursor: pointer; padding: 5px 8px; border: none; border-radius: 5px; color: white; margin: 2px; }
+    .bayar { background: #4CAF50; }
+    .edit { background: #FFC107; color: black; }
+    .hapus { background: #F44336; }
+
 /* Upload Box */
 .upload-box {
   max-width: 500px;
