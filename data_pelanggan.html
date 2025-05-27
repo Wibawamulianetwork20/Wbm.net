@@ -94,17 +94,29 @@ function uploadData() {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const jsonData = JSON.parse(e.target.result);
+      const text = e.target.result.trim(); // Bersihkan spasi/karakter aneh
+      const jsonData = JSON.parse(text);
+
+      if (!Array.isArray(jsonData)) {
+        alert("Format JSON harus array.");
+        return;
+      }
+
       let uploadPromises = [];
 
-      jsonData.forEach((pelanggan) => {
-        const newRef = db.ref("pelanggan").push(); // Buat ID unik
+      jsonData.forEach((pelanggan, index) => {
+        if (!pelanggan.nama || !pelanggan.paket || !pelanggan.harga) {
+          console.error(`Data pelanggan index ${index} tidak lengkap:`, pelanggan);
+          return; // Lewati data yang tidak lengkap
+        }
+
+        const newRef = db.ref("pelanggan").push(); // Buat ID otomatis di Realtime
         uploadPromises.push(newRef.set(pelanggan));
       });
 
       Promise.all(uploadPromises)
         .then(() => {
-          alert("Data berhasil di-upload ke Realtime Database!");
+          alert("Semua data berhasil di-upload ke Realtime Database!");
           document.getElementById("uploadBox").style.display = "none";
           document.getElementById("showUpload").style.display = "block";
           location.reload();
@@ -115,13 +127,13 @@ function uploadData() {
         });
 
     } catch (error) {
-      alert("Format file JSON salah. Cek kembali file kamu.");
+      alert("Format file JSON salah: " + error.message);
       console.error(error);
     }
   };
 
   reader.onerror = (error) => {
-    alert("Gagal membaca file JSON: " + error.message);
+    alert("Gagal membaca file: " + error.message);
     console.error(error);
   };
 
