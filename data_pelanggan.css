@@ -50,7 +50,30 @@ h2 {
   cursor: pointer;
 }
 
-#tabelPelanggan tbody tr:nth-child(even) {
+#tabelpelanggan tbody tr:nth-child(even) {
+  background: #f1f1f1;
+}
+
+#Pelangganlunas th {
+  background: linear-gradient(90deg, #26a69a, #009688);
+  color: white;
+  text-align: center;
+  padding: 14px;
+  font-weight: 600;
+}
+
+#Pelangganlunas td {
+  text-align: center;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+}
+
+#Pelangganlunas tbody tr:hover {
+  background: #b2dfdb;
+  cursor: pointer;
+}
+
+#Pelangganlunas tbody tr:nth-child(even) {
   background: #f1f1f1;
 }
 
