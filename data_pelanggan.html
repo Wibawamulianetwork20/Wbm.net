@@ -57,12 +57,16 @@
     const db = firebase.firestore();
 
     // Ambil Data Pelanggan dari Firebase
-    let totalHarga = 0;
-    let no = 1;
-    db.collection("pelanggan").get().then(snapshot => {
-  snapshot.forEach(doc => {
+    // Ambil Data Pelanggan
+let totalHarga = 0;
+let no = 1;
+let dataPelanggan = []; // Array sementara untuk menampung data
+
+db.collection("pelanggan").get().then((querySnapshot) => {
+  console.log(`Total data: ${querySnapshot.size}`);
+  querySnapshot.forEach(doc => {
     const data = doc.data();
-    const row = `
+    dataPelanggan.push(`
       <tr>
         <td>${no++}</td>
         <td>${data.nama || ''}</td>
@@ -70,14 +74,19 @@
         <td>${data.keterangan || ''}</td>
         <td>Rp ${data.harga || '0'}</td>
       </tr>
-    `;
-    document.querySelector("#tabelPelanggan tbody").insertAdjacentHTML("beforeend", row);
+    `);
     totalHarga += parseInt(data.harga) || 0;
   });
+
+  // Masukkan semua data sekaligus ke <tbody>
+  document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
   document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
 
-  // Inisialisasi DataTables setelah data masuk
-  $('#tabelPelanggan').DataTable();
+  // Inisialisasi DataTables setelah data lengkap
+  $('#tabelPelanggan').DataTable({
+    pageLength: 25,
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
+  });
 });
 
     // Upload Data dari JSON
