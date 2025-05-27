@@ -167,27 +167,12 @@ footer {
     height: 50vh;
   }
   #typed-text {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   .boxed-section, .card {
     padding: 1.2rem;
   }
   h2 {
     font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .hero {
-    height: 45vh;
-  }
-  #typed-text {
-    font-size: 1.3rem;
-  }
-  .navbar-brand {
-    font-size: 1.2rem;
-  }
-  footer {
-    font-size: 13px;
   }
 }
