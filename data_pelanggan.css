@@ -1,9 +1,18 @@
-/* Global */
+/* Animasi Background Gradient */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #74ebd5, #acb6e5);
+  min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  padding: 0;
+  background: linear-gradient(270deg, #00c6ff, #0072ff, #00c6ff);
+  background-size: 600% 600%;
+  animation: gradientMove 15s ease infinite;
   color: #333;
 }
 
