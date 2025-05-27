@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
   <link rel="stylesheet" href="dashboard.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
@@ -43,5 +39,34 @@
       </div>
     </div>
   </main>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+    authDomain: "wibawamulianetwork.firebaseapp.com",
+    databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "wibawamulianetwork",
+    storageBucket: "wibawamulianetwork.firebasestorage.app",
+    messagingSenderId: "605020393823",
+    appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
+    measurementId: "G-9EWJE8F5FG"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Hitung total pelanggan dari Realtime Database
+  db.ref("pelanggan").once("value")
+    .then(snapshot => {
+      const total = snapshot.numChildren();
+      document.getElementById("totalPelanggan").innerText = total;
+    })
+    .catch(err => {
+      console.error(err);
+    });
+</script>
+  
 </body>
 </html>
