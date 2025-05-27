@@ -70,7 +70,7 @@ db.ref('pelangganlunas').once('value')
       `);
     });
 
-    document.querySelector('#tabelPelangganLunas tbody').innerHTML = dataPelanggan.join('');
+    document.querySelector('#PelangganLunas tbody').innerHTML = dataPelanggan.join('');
   })
   .catch(err => {
     console.error(err);
