@@ -18,6 +18,7 @@
         <th>Paket</th>
         <th>Keterangan</th>
         <th>Harga</th>
+        <th>aksi</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -116,6 +117,11 @@ firebase.initializeApp(firebaseConfig);
             <td>${data.paket || ''}</td>
             <td>${data.keterangan || ''}</td>
             <td>Rp ${data.harga || '0'}</td>
+            <td>
+              <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
+              <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
+              <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
+            </td>
           </tr>
         `);
         totalHarga += parseInt(data.harga) || 0;
@@ -129,6 +135,45 @@ firebase.initializeApp(firebaseConfig);
         lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
       });
     });
+
+    function bayarPelanggan(id) {
+      db.ref('pelanggan/' + id).once('value').then(snapshot => {
+        const data = snapshot.val();
+        db.ref('pelangganlunas/' + id).set(data).then(() => {
+          db.ref('pelanggan/' + id).remove();
+          alert("Pelanggan berhasil dibayar!");
+          location.reload();
+        });
+      });
+    }
+
+    function editPelanggan(id) {
+      const newNama = prompt("Masukkan nama baru:");
+      const newPaket = prompt("Masukkan paket baru:");
+      const newKeterangan = prompt("Masukkan keterangan baru:");
+      const newHarga = prompt("Masukkan harga baru:");
+
+      if (newNama && newPaket && newKeterangan && newHarga) {
+        db.ref('pelanggan/' + id).update({
+          nama: newNama,
+          paket: newPaket,
+          keterangan: newKeterangan,
+          harga: newHarga
+        }).then(() => {
+          alert("Data berhasil diperbarui!");
+          location.reload();
+        });
+      }
+    }
+
+    function hapusPelanggan(id) {
+      if (confirm("Yakin ingin hapus data ini?")) {
+        db.ref('pelanggan/' + id).remove().then(() => {
+          alert("Data berhasil dihapus!");
+          location.reload();
+        });
+      }
+    }
 
     // Hide/Show Upload Box
     document.getElementById("hideUpload").addEventListener("click", () => {
