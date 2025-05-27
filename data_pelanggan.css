@@ -21,7 +21,8 @@ h2 {
 }
 
 /* Tabel */
-#tabelPelanggan {
+#tabelPelanggan,
+#pelangganlunas {
   width: 100%;
   border-collapse: collapse;
   background: white;
@@ -31,7 +32,8 @@ h2 {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-#tabelPelanggan th {
+#tabelPelanggan th,
+#pelangganlunas th {
   background: linear-gradient(90deg, #26a69a, #009688);
   color: white;
   text-align: center;
@@ -39,51 +41,21 @@ h2 {
   font-weight: 600;
 }
 
-#tabelPelanggan td {
+#tabelPelanggan td,
+#pelangganlunas td {
   text-align: center;
   padding: 12px 14px;
   font-size: 0.95rem;
 }
 
-#tabelPelanggan tbody tr:hover {
+#tabelPelanggan tbody tr:hover,
+#pelangganlunas tbody tr:hover {
   background: #b2dfdb;
   cursor: pointer;
 }
 
-#tabelpelanggan tbody tr:nth-child(even) {
-  background: #f1f1f1;
-}
-
-#Pelangganlunas {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  margin: 20px 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-#Pelangganlunas th {
-  background: linear-gradient(90deg, #26a69a, #009688);
-  color: white;
-  text-align: center;
-  padding: 14px;
-  font-weight: 600;
-}
-
-#Pelangganlunas td {
-  text-align: center;
-  padding: 12px 14px;
-  font-size: 0.95rem;
-}
-
-#Pelangganlunas tbody tr:hover {
-  background: #b2dfdb;
-  cursor: pointer;
-}
-
-#Pelangganlunas tbody tr:nth-child(even) {
+#tabelPelanggan tbody tr:nth-child(even),
+#pelangganlunas tbody tr:nth-child(even) {
   background: #f1f1f1;
 }
 
@@ -101,7 +73,7 @@ h2 {
 }
 
 /* Total Harga */
-.total {
+.total-info{
   text-align: right;
   margin-top: 15px;
   font-size: 1.1rem;
