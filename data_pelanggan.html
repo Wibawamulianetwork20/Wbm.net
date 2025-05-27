@@ -62,21 +62,16 @@ firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     // Upload JSON ke Realtime Database
+        // Upload JSON
     function uploadData() {
       const file = document.getElementById("jsonFile").files[0];
-      if (!file) {
-        alert("Pilih file JSON dulu!");
-        return;
-      }
+      if (!file) { alert("Pilih file JSON dulu!"); return; }
 
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const jsonData = JSON.parse(e.target.result);
-          if (!Array.isArray(jsonData)) {
-            alert("Format JSON harus array");
-            return;
-          }
+          if (!Array.isArray(jsonData)) { alert("Format JSON harus array"); return; }
 
           let uploadPromises = [];
           jsonData.forEach((pelanggan) => {
@@ -85,24 +80,16 @@ firebase.initializeApp(firebaseConfig);
           });
 
           Promise.all(uploadPromises)
-            .then(() => {
-              alert("Data berhasil di-upload ke Realtime Database!");
-              document.getElementById("uploadBox").style.display = "none";
-              document.getElementById("showUpload").style.display = "block";
-              location.reload();
-            })
-            .catch(err => {
-              alert("Gagal upload: " + err.message);
-            });
+            .then(() => { alert("Data berhasil di-upload!"); location.reload(); })
+            .catch(err => alert("Gagal upload: " + err.message));
         } catch (err) {
-          alert("Format file JSON salah: " + err.message);
+          alert("Format JSON salah: " + err.message);
         }
       };
-
       reader.readAsText(file);
     }
 
-    // Ambil Data dari Realtime Database
+    // Tampilkan Data Pelanggan
     let totalHarga = 0;
     let no = 1;
     let dataPelanggan = [];
@@ -110,6 +97,7 @@ firebase.initializeApp(firebaseConfig);
     db.ref("pelanggan").once("value").then((snapshot) => {
       snapshot.forEach((childSnapshot) => {
         const data = childSnapshot.val();
+        const id = childSnapshot.key;
         dataPelanggan.push(`
           <tr>
             <td>${no++}</td>
@@ -121,6 +109,7 @@ firebase.initializeApp(firebaseConfig);
               <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
               <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
               <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
+              <button class="aksi-btn hapus-double" onclick="hapusDouble('${data.nama}')">Hapus Double</button>
             </td>
           </tr>
         `);
@@ -175,16 +164,19 @@ firebase.initializeApp(firebaseConfig);
       }
     }
 
-    // Hide/Show Upload Box
-    document.getElementById("hideUpload").addEventListener("click", () => {
-      document.getElementById("uploadBox").style.display = "none";
-      document.getElementById("showUpload").style.display = "block";
-    });
-
-    document.getElementById("showUpload").addEventListener("click", () => {
-      document.getElementById("uploadBox").style.display = "block";
-      document.getElementById("showUpload").style.display = "none";
-    });
+    function hapusDouble(nama) {
+      if (confirm(`Yakin ingin hapus semua data dengan nama "${nama}"?`)) {
+        db.ref('pelanggan').once('value').then(snapshot => {
+          snapshot.forEach(child => {
+            if (child.val().nama === nama) {
+              db.ref('pelanggan/' + child.key).remove();
+            }
+          });
+          alert("Semua data dengan nama sama berhasil dihapus!");
+          location.reload();
+        });
+      }
+    }
   </script>
 </body>
 </html>
