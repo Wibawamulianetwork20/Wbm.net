@@ -48,70 +48,80 @@
       measurementId: "G-9EWJE8F5FG"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const db = firebase.database(); // INI YANG BETUL
 
-    // Ambil Data Pelanggan dari Firebase
-    // Ambil Data Pelanggan
-let totalHarga = 0;
-let no = 1;
-
-db.ref("pelanggan").once("value").then((snapshot) => {
+  // Ambil Data Pelanggan dari Realtime Database
+  let totalHarga = 0;
+  let no = 1;
   let dataPelanggan = [];
 
-  snapshot.forEach((childSnapshot) => {
-    const data = childSnapshot.val();
-    dataPelanggan.push(`
-      <tr>
-        <td>${no++}</td>
-        <td>${data.nama || ''}</td>
-        <td>${data.paket || ''}</td>
-        <td>${data.keterangan || ''}</td>
-        <td>Rp ${data.harga || '0'}</td>
-      </tr>
-    `);
-    totalHarga += parseInt(data.harga) || 0;
-  });
-
-  document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
-  document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
-
-  $('#tabelPelanggan').DataTable({
-    pageLength: 25,
-    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
-  });
-});
-
-   // Fungsi Upload JSON ke Realtime Database
-function uploadData() {
-  const file = document.getElementById("jsonFile").files[0];
-  if (!file) {
-    alert("Pilih file JSON dulu!");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const jsonData = JSON.parse(e.target.result);
-    let uploadPromises = [];
-
-    jsonData.forEach(pelanggan => {
-      const newRef = db.ref("pelanggan").push();
-      uploadPromises.push(newRef.set(pelanggan));
+  db.ref("pelanggan").once("value").then((snapshot) => {
+    snapshot.forEach((childSnapshot) => {
+      const data = childSnapshot.val();
+      dataPelanggan.push(`
+        <tr>
+          <td>${no++}</td>
+          <td>${data.nama || ''}</td>
+          <td>${data.paket || ''}</td>
+          <td>${data.keterangan || ''}</td>
+          <td>Rp ${data.harga || '0'}</td>
+        </tr>
+      `);
+      totalHarga += parseInt(data.harga) || 0;
     });
 
-    Promise.all(uploadPromises)
-      .then(() => {
-        alert("Semua data berhasil di-upload ke Realtime Database!");
-        document.getElementById("uploadBox").style.display = "none";
-        document.getElementById("showUpload").style.display = "block";
-        location.reload();
-      })
-      .catch(err => {
-        alert("Gagal upload: " + err.message);
-      });
-  };
-  reader.readAsText(file);
-}
+    document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
+    document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+
+    $('#tabelPelanggan').DataTable({
+      pageLength: 25,
+      lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
+    });
+  });
+
+  // Upload JSON ke Realtime Database
+  function uploadData() {
+    const file = document.getElementById("jsonFile").files[0];
+    if (!file) {
+      alert("Pilih file JSON dulu!");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonData = JSON.parse(e.target.result);
+        if (!Array.isArray(jsonData)) {
+          alert("Format JSON salah: Harus array");
+          return;
+        }
+
+        let uploadPromises = [];
+
+        jsonData.forEach(pelanggan => {
+          const newRef = db.ref("pelanggan").push();
+          uploadPromises.push(newRef.set(pelanggan));
+        });
+
+        Promise.all(uploadPromises)
+          .then(() => {
+            alert("Semua data berhasil di-upload ke Realtime Database!");
+            document.getElementById("uploadBox").style.display = "none";
+            document.getElementById("showUpload").style.display = "block";
+            location.reload();
+          })
+          .catch(err => {
+            alert("Gagal upload: " + err.message);
+            console.error(err);
+          });
+      } catch (err) {
+        alert("Format file JSON salah: " + err.message);
+        console.error(err);
+      }
+    };
+
+    reader.readAsText(file);
+  }
   </script>
 </body>
 </html>
