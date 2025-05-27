@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pelanggan Lunas</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="pelanggan_lunas.css" type="text/css" media="all" />
+</head>
+<body>
+  <h2>Data Pelanggan Lunas</h2>
+
+  <table id="pelangganlunas" class="display">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>Paket</th>
+        <th>Keterangan</th>
+        <th>Harga</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="total">
+    Total Harga: <span id="totalHarga">Rp 0</span>
+  </div>
+
+  <!-- Firebase + Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.firebasestorage.app",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Mendapatkan data dari pelangganlunas
+function loadPelangganLunas() {
+  const tbody = document.querySelector('#pelangganlunas tbody');
+  db.ref('pelangganlunas').once('value', (snapshot) => {
+    let data = '';
+    let no = 1;
+    snapshot.forEach(child => {
+      const pelanggan = child.val();
+      data += `
+        <tr>
+          <td>${no++}</td>
+          <td>${pelanggan.nama}</td>
+          <td>${pelanggan.paket}</td>
+          <td>${pelanggan.keterangan}</td>
+          <td>Rp ${pelanggan.harga}</td>
+          <td><button onclick="kembalikanPelanggan('${child.key}')">Kembalikan</button></td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = data;
+  }, (error) => {
+    alert('Gagal mengambil data: ' + error.message);
+  });
+}
+
+function kembalikanPelanggan(id) {
+  const refLunas = db.ref('pelangganlunas/' + id);
+  refLunas.once('value').then(snapshot => {
+    const data = snapshot.val();
+    db.ref('pelanggan/' + id).set(data, (err) => {
+      if (!err) {
+        refLunas.remove();
+        alert('Data dikembalikan ke pelanggan aktif');
+        loadPelangganLunas();
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', loadPelangganLunas);
+  </script>
+</body>
+</html>

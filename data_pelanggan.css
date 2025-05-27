@@ -1,0 +1,133 @@
+/* Animasi Background */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
+  background-size: 600% 600%;
+  animation: gradientMove 15s ease infinite;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+/* Judul */
+h2 {
+  text-align: center;
+  color: #004d40;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+/* Upload JSON & Hapus Duplikat */
+#jsonFile, .btn {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#jsonFile {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn-upload {
+  background: linear-gradient(90deg, #00b894, #00cec9);
+  color: white;
+}
+
+.btn-hapus-duplikat {
+  background: linear-gradient(90deg, #ff6f61, #ff9966);
+  color: white;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Tabel */
+#tabelPelanggan {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+#tabelPelanggan th {
+  background: linear-gradient(90deg, #26a69a, #009688);
+  color: white;
+  padding: 14px;
+}
+
+#tabelPelanggan td {
+  text-align: center;
+  padding: 12px;
+  font-size: 0.95rem;
+}
+
+#tabelPelanggan tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+#tabelPelanggan tbody tr:hover {
+  background: #d0f0e0;
+  cursor: pointer;
+}
+
+/* Tombol Aksi */
+.aksi-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin: 0 2px;
+  transition: all 0.3s ease;
+}
+
+.aksi-btn.bayar { background: #4caf50; color: white; }
+.aksi-btn.edit { background: #f39c12; color: white; }
+.aksi-btn.hapus { background: #e74c3c; color: white; }
+
+.aksi-btn:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+/* Total Harga */
+#totalHarga {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #00695c;
+  margin-top: 20px;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 1.6rem;
+  }
+
+  #tabelPelanggan th, #tabelPelanggan td {
+    font-size: 0.85rem;
+  }
+
+  .btn, .aksi-btn {
+    width: 100%;
+    margin: 10px 0;
+  }
+}
