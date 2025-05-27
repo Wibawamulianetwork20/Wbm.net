@@ -66,6 +66,21 @@
     .catch(err => {
       console.error(err);
     });
+  function loadTotalPelangganLunas() {
+  const totalLunasEl = document.getElementById('totalPelangganLunas');
+  const dbLunas = firebase.database().ref('pelangganlunas');
+  
+  dbLunas.once('value', (snapshot) => {
+    let total = snapshot.size || snapshot.numChildren(); // cek size
+    totalLunasEl.textContent = total;
+  }).catch((error) => {
+    console.error('Gagal mengambil data:', error);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadTotalPelangganLunas();
+});
 </script>
   
 </body>
