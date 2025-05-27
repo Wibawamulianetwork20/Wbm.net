@@ -36,6 +36,12 @@
   </div>
 
   <script>
+  $(document).ready(function() {
+    $('#tabelPelanggan').DataTable();
+  });
+</script>
+
+  <script>
     // Firebase Config (Ganti dengan milikmu)
     const firebaseConfig = {
       apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
@@ -54,23 +60,25 @@
     let totalHarga = 0;
     let no = 1;
     db.collection("pelanggan").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = `
-          <tr>
-            <td>${no++}</td>
-            <td>${data.nama || ''}</td>
-            <td>${data.paket || ''}</td>
-            <td>${data.keterangan || ''}</td>
-            <td>Rp ${data.harga || '0'}</td>
-          </tr>
-        `;
-        document.querySelector("#tabelPelanggan tbody").insertAdjacentHTML("beforeend", row);
-        totalHarga += parseInt(data.harga) || 0;
-      });
-      document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
-      $('#tabelPelanggan').DataTable();
-    });
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const row = `
+      <tr>
+        <td>${no++}</td>
+        <td>${data.nama || ''}</td>
+        <td>${data.paket || ''}</td>
+        <td>${data.keterangan || ''}</td>
+        <td>Rp ${data.harga || '0'}</td>
+      </tr>
+    `;
+    document.querySelector("#tabelPelanggan tbody").insertAdjacentHTML("beforeend", row);
+    totalHarga += parseInt(data.harga) || 0;
+  });
+  document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+
+  // Inisialisasi DataTables setelah data masuk
+  $('#tabelPelanggan').DataTable();
+});
 
     // Upload Data dari JSON
     function uploadData() {
