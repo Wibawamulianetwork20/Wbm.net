@@ -39,6 +39,8 @@
     // Firebase Config (Ganti dengan milikmu)
     const firebaseConfig = {
       apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+    // Firebase Config
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
       authDomain: "wibawamulianetwork.firebaseapp.com",
       databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "wibawamulianetwork",
@@ -46,82 +48,103 @@
       messagingSenderId: "605020393823",
       appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
       measurementId: "G-9EWJE8F5FG"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database(); // INI YANG BETUL
+};
 
-  // Ambil Data Pelanggan dari Realtime Database
-  let totalHarga = 0;
-  let no = 1;
-  let dataPelanggan = [];
+// Inisialisasi Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database(); // Realtime Database
 
-  db.ref("pelanggan").once("value").then((snapshot) => {
-    snapshot.forEach((childSnapshot) => {
-      const data = childSnapshot.val();
-      dataPelanggan.push(`
-        <tr>
-          <td>${no++}</td>
-          <td>${data.nama || ''}</td>
-          <td>${data.paket || ''}</td>
-          <td>${data.keterangan || ''}</td>
-          <td>Rp ${data.harga || '0'}</td>
-        </tr>
-      `);
-      totalHarga += parseInt(data.harga) || 0;
-    });
+// Fungsi Upload JSON ke Realtime Database
+function uploadData() {
+  console.log("Fungsi uploadData dipanggil");
+  const fileInput = document.getElementById("jsonFile");
+  const file = fileInput.files[0];
 
-    document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
-    document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+  if (!file) {
+    alert("Pilih file JSON dulu!");
+    return;
+  }
 
-    $('#tabelPelanggan').DataTable({
-      pageLength: 25,
-      lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
-    });
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const jsonData = JSON.parse(e.target.result);
+      if (!Array.isArray(jsonData)) {
+        alert("Format JSON harus array");
+        return;
+      }
+
+      let uploadPromises = [];
+      jsonData.forEach((pelanggan, index) => {
+        const newRef = db.ref("pelanggan").push();
+        uploadPromises.push(newRef.set(pelanggan));
+      });
+
+      Promise.all(uploadPromises)
+        .then(() => {
+          alert("Data berhasil di-upload ke Realtime Database!");
+          document.getElementById("uploadBox").style.display = "none";
+          document.getElementById("showUpload").style.display = "block";
+          location.reload();
+        })
+        .catch(err => {
+          alert("Gagal upload: " + err.message);
+          console.error(err);
+        });
+    } catch (err) {
+      alert("Format file JSON salah: " + err.message);
+      console.error(err);
+    }
+  };
+
+  reader.onerror = (err) => {
+    alert("Gagal membaca file: " + err.message);
+    console.error(err);
+  };
+
+  reader.readAsText(file);
+}
+
+// Ambil Data dari Realtime Database dan Tampilkan ke Tabel
+let totalHarga = 0;
+let no = 1;
+let dataPelanggan = [];
+
+db.ref("pelanggan").once("value").then((snapshot) => {
+  console.log("Data pelanggan diambil dari Realtime Database");
+  snapshot.forEach((childSnapshot) => {
+    const data = childSnapshot.val();
+    dataPelanggan.push(`
+      <tr>
+        <td>${no++}</td>
+        <td>${data.nama || ''}</td>
+        <td>${data.paket || ''}</td>
+        <td>${data.keterangan || ''}</td>
+        <td>Rp ${data.harga || '0'}</td>
+      </tr>
+    `);
+    totalHarga += parseInt(data.harga) || 0;
   });
 
-  // Upload JSON ke Realtime Database
-  function uploadData() {
-    const file = document.getElementById("jsonFile").files[0];
-    if (!file) {
-      alert("Pilih file JSON dulu!");
-      return;
-    }
+  document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
+  document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const jsonData = JSON.parse(e.target.result);
-        if (!Array.isArray(jsonData)) {
-          alert("Format JSON salah: Harus array");
-          return;
-        }
+  $('#tabelPelanggan').DataTable({
+    pageLength: 25,
+    lengthMenu: [ [10, 25, 50, -1], [10, 25, 50, "Semua"] ]
+  });
+});
 
-        let uploadPromises = [];
+// Sembunyikan / Tampilkan Upload Box
+document.getElementById("hideUpload").addEventListener("click", () => {
+  document.getElementById("uploadBox").style.display = "none";
+  document.getElementById("showUpload").style.display = "block";
+});
 
-        jsonData.forEach(pelanggan => {
-          const newRef = db.ref("pelanggan").push();
-          uploadPromises.push(newRef.set(pelanggan));
-        });
-
-        Promise.all(uploadPromises)
-          .then(() => {
-            alert("Semua data berhasil di-upload ke Realtime Database!");
-            document.getElementById("uploadBox").style.display = "none";
-            document.getElementById("showUpload").style.display = "block";
-            location.reload();
-          })
-          .catch(err => {
-            alert("Gagal upload: " + err.message);
-            console.error(err);
-          });
-      } catch (err) {
-        alert("Format file JSON salah: " + err.message);
-        console.error(err);
-      }
-    };
-
-    reader.readAsText(file);
-  }
+document.getElementById("showUpload").addEventListener("click", () => {
+  document.getElementById("uploadBox").style.display = "block";
+  document.getElementById("showUpload").style.display = "none";
+});
   </script>
 </body>
 </html>
