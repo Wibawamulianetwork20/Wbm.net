@@ -1,112 +1,59 @@
-/* Reset dasar */
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Body */
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
+  height: 100vh;
+  background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
 }
 
+/* Container */
 .container {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  width: 300px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-h2 {
   text-align: center;
-  color: #4CAF50;
-  margin-bottom: 20px;
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 90%;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-input {
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border 0.3s;
-}
-
-input:focus {
-  border-color: #4CAF50;
-  outline: none;
-}
-
-button {
-  background: #4CAF50;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 10px;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background: #45a049;
-}
-
+/* Title & Subtitle */
 .title {
   font-size: 2rem;
   font-weight: bold;
-  color: #333;
+  color: #00796b;
   margin-bottom: 10px;
 }
 
 .subtitle {
-  font-size: 1.2rem;
-  color: #4CAF50;
+  font-size: 1.1rem;
+  color: #555;
   margin-bottom: 30px;
 }
 
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-}
-
-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+/* Buttons */
+.buttons a {
+  display: block;
+  text-decoration: none;
+  background: linear-gradient(90deg, #26a69a, #009688);
   color: white;
+  padding: 12px 0;
+  margin: 10px 0;
+  border-radius: 8px;
+  font-weight: bold;
   transition: background 0.3s, transform 0.2s;
 }
 
-button:hover {
+.buttons a:hover {
+  background: linear-gradient(90deg, #009688, #00796b);
   transform: scale(1.05);
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .title {
-    font-size: 1.5rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  button {
-    width: 100%;
-  }
 }
