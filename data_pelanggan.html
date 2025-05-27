@@ -81,22 +81,37 @@ db.ref("pelanggan").once("value").then((snapshot) => {
   });
 });
 
-    // Upload Data dari JSON
-    function uploadData() {
-      const file = document.getElementById("jsonFile").files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const jsonData = JSON.parse(e.target.result);
-        jsonData.forEach(pelanggan => {
-          db.collection("pelanggan").add(pelanggan)
-            .then(() => console.log(`Data ${pelanggan.nama} berhasil di-upload.`))
-            .catch(err => console.error("Gagal upload", err));
-        });
-        alert("Semua data berhasil di-upload ke Firebase!");
-        location.reload(); // Refresh untuk lihat data baru
-      };
-      reader.readAsText(file);
-    }
+   // Fungsi Upload JSON ke Realtime Database
+function uploadData() {
+  const file = document.getElementById("jsonFile").files[0];
+  if (!file) {
+    alert("Pilih file JSON dulu!");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const jsonData = JSON.parse(e.target.result);
+    let uploadPromises = [];
+
+    jsonData.forEach((pelanggan, index) => {
+      const newRef = db.ref("pelanggan").push(); // Buat ID unik
+      uploadPromises.push(newRef.set(pelanggan));
+    });
+
+    Promise.all(uploadPromises)
+      .then(() => {
+        alert("Data berhasil di-upload ke Realtime Database!");
+        document.getElementById("uploadBox").style.display = "none";
+        document.getElementById("showUpload").style.display = "block";
+        location.reload();
+      })
+      .catch(err => {
+        alert("Gagal upload: " + err.message);
+      });
+  };
+  reader.readAsText(file);
+}
   </script>
 </body>
 </html>
