@@ -22,6 +22,53 @@ h1, h2 {
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
+/* Container Upload JSON dan Hapus Duplikat */
+.upload-actions {
+  margin: 20px 0;
+  text-align: center;
+}
+
+/* Tombol Upload JSON dan Hapus Duplikat */
+button.upload-btn,
+button.hapus-duplikat-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: 0.3s;
+}
+
+button.upload-btn {
+  background: linear-gradient(90deg, #00b894, #00cec9);
+  color: white;
+}
+
+button.hapus-duplikat-btn {
+  background: linear-gradient(90deg, #ff6f61, #ff9966);
+  color: white;
+}
+
+button.upload-btn:hover,
+button.hapus-duplikat-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* File Input (Upload JSON) */
+input[type="file"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  width: 50%;
+  text-align: center;
+}
+
 /* Tabel */
 #tabelPelanggan,
 #pelangganlunas {
