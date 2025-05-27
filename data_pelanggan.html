@@ -83,9 +83,7 @@ db.ref("pelanggan").once("value").then((snapshot) => {
 
    // Fungsi Upload JSON ke Realtime Database
 function uploadData() {
-  const fileInput = document.getElementById("jsonFile");
-  const file = fileInput.files[0];
-
+  const file = document.getElementById("jsonFile").files[0];
   if (!file) {
     alert("Pilih file JSON dulu!");
     return;
@@ -93,50 +91,25 @@ function uploadData() {
 
   const reader = new FileReader();
   reader.onload = (e) => {
-    try {
-      const text = e.target.result.trim(); // Bersihkan spasi/karakter aneh
-      const jsonData = JSON.parse(text);
+    const jsonData = JSON.parse(e.target.result);
+    let uploadPromises = [];
 
-      if (!Array.isArray(jsonData)) {
-        alert("Format JSON harus array.");
-        return;
-      }
+    jsonData.forEach(pelanggan => {
+      const newRef = db.ref("pelanggan").push();
+      uploadPromises.push(newRef.set(pelanggan));
+    });
 
-      let uploadPromises = [];
-
-      jsonData.forEach((pelanggan, index) => {
-        if (!pelanggan.nama || !pelanggan.paket || !pelanggan.harga) {
-          console.error(`Data pelanggan index ${index} tidak lengkap:`, pelanggan);
-          return; // Lewati data yang tidak lengkap
-        }
-
-        const newRef = db.ref("pelanggan").push(); // Buat ID otomatis di Realtime
-        uploadPromises.push(newRef.set(pelanggan));
+    Promise.all(uploadPromises)
+      .then(() => {
+        alert("Semua data berhasil di-upload ke Realtime Database!");
+        document.getElementById("uploadBox").style.display = "none";
+        document.getElementById("showUpload").style.display = "block";
+        location.reload();
+      })
+      .catch(err => {
+        alert("Gagal upload: " + err.message);
       });
-
-      Promise.all(uploadPromises)
-        .then(() => {
-          alert("Semua data berhasil di-upload ke Realtime Database!");
-          document.getElementById("uploadBox").style.display = "none";
-          document.getElementById("showUpload").style.display = "block";
-          location.reload();
-        })
-        .catch(err => {
-          alert("Gagal upload: " + err.message);
-          console.error(err);
-        });
-
-    } catch (error) {
-      alert("Format file JSON salah: " + error.message);
-      console.error(error);
-    }
   };
-
-  reader.onerror = (error) => {
-    alert("Gagal membaca file: " + error.message);
-    console.error(error);
-  };
-
   reader.readAsText(file);
 }
   </script>
