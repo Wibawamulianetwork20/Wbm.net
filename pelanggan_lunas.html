@@ -48,10 +48,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let totalHarga = 0;
-    let no = 1;
-    let dataPelanggan = [];
-
     // Mendapatkan data dari pelangganlunas
 db.ref('pelangganlunas').once('value')
   .then(snapshot => {
@@ -80,11 +76,6 @@ db.ref('pelangganlunas').once('value')
     console.error(err);
     alert('Gagal mengambil data: ' + err.message);
   });
-      $('#tabelPelangganlunas').DataTable({
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]]
-      });
-    });
 
     function kembalikanPelanggan(id) {
       db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
