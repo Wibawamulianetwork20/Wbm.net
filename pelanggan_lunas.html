@@ -57,17 +57,17 @@ db.ref('pelangganlunas').once('value')
       let id = childSnapshot.key;
       let data = childSnapshot.val();
       dataPelanggan.push(`
-        <tr>
-          <td>${no++}</td>
-          <td>${data.nama || ''}</td>
-          <td>${data.paket || ''}</td>
-          <td>${data.keterangan || ''}</td>
-          <td>Rp ${data.harga || '0'}</td>
-          <td>
-            <button class="aksi-btn hapus" onclick="hapusLunas('${id}')">Hapus</button>
-          </td>
-        </tr>
-      `);
+  <tr>
+    <td>${no++}</td>
+    <td>${data.nama || ''}</td>
+    <td>${data.paket || ''}</td>
+    <td>${data.keterangan || ''}</td>
+    <td>Rp ${data.harga || '0'}</td>
+    <td>
+      <button class="aksi-btn hapus" onclick="kembalikanPelanggan('${id}')">Kembalikan</button>
+    </td>
+  </tr>
+`);
     });
 
     document.querySelector('#pelangganlunas tbody').innerHTML = dataPelanggan.join('');
