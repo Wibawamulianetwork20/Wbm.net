@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Pelanggan & Upload JSON</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    h2 { color: #4CAF50; }
+    table { background: white; border-radius: 8px; overflow: hidden; margin-top: 20px; }
+    table th { background: #4CAF50; color: white; }
+    .total { text-align: right; margin-top: 10px; }
+    .upload-box { margin-top: 30px; background: white; padding: 20px; border-radius: 8px; }
+    input, button { padding: 10px; margin: 10px 0; border-radius: 5px; width: 100%; max-width: 300px; }
+    button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <h2>Data Pelanggan</h2>
+  <table id="tabelPelanggan" class="display">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>Paket</th>
+        <th>Keterangan</th>
+        <th>Harga</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div class="total">
+    Total Harga: <span id="totalHarga">Rp 0</span>
+  </div>
+
+  <div class="upload-box">
+    <h2>Upload Data JSON Pelanggan</h2>
+    <input type="file" id="jsonFile" accept=".json" />
+    <button onclick="uploadData()">Upload JSON</button>
+  </div>
+
+  <script>
+    // Firebase Config (Ganti dengan milikmu)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.firebasestorage.app",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
+      measurementId: "G-9EWJE8F5FG"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Ambil Data Pelanggan dari Firebase
+    let totalHarga = 0;
+    let no = 1;
+    db.collection("pelanggan").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const row = `
+          <tr>
+            <td>${no++}</td>
+            <td>${data.nama || ''}</td>
+            <td>${data.paket || ''}</td>
+            <td>${data.keterangan || ''}</td>
+            <td>Rp ${data.harga || '0'}</td>
+          </tr>
+        `;
+        document.querySelector("#tabelPelanggan tbody").insertAdjacentHTML("beforeend", row);
+        totalHarga += parseInt(data.harga) || 0;
+      });
+      document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+      $('#tabelPelanggan').DataTable();
+    });
+
+    // Upload Data dari JSON
+    function uploadData() {
+      const file = document.getElementById("jsonFile").files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const jsonData = JSON.parse(e.target.result);
+        jsonData.forEach(pelanggan => {
+          db.collection("pelanggan").add(pelanggan)
+            .then(() => console.log(`Data ${pelanggan.nama} berhasil di-upload.`))
+            .catch(err => console.error("Gagal upload", err));
+        });
+        alert("Semua data berhasil di-upload ke Firebase!");
+        location.reload(); // Refresh untuk lihat data baru
+      };
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>
