@@ -83,7 +83,9 @@ db.ref("pelanggan").once("value").then((snapshot) => {
 
    // Fungsi Upload JSON ke Realtime Database
 function uploadData() {
-  const file = document.getElementById("jsonFile").files[0];
+  const fileInput = document.getElementById("jsonFile");
+  const file = fileInput.files[0];
+
   if (!file) {
     alert("Pilih file JSON dulu!");
     return;
@@ -91,25 +93,38 @@ function uploadData() {
 
   const reader = new FileReader();
   reader.onload = (e) => {
-    const jsonData = JSON.parse(e.target.result);
-    let uploadPromises = [];
+    try {
+      const jsonData = JSON.parse(e.target.result);
+      let uploadPromises = [];
 
-    jsonData.forEach((pelanggan, index) => {
-      const newRef = db.ref("pelanggan").push(); // Buat ID unik
-      uploadPromises.push(newRef.set(pelanggan));
-    });
-
-    Promise.all(uploadPromises)
-      .then(() => {
-        alert("Data berhasil di-upload ke Realtime Database!");
-        document.getElementById("uploadBox").style.display = "none";
-        document.getElementById("showUpload").style.display = "block";
-        location.reload();
-      })
-      .catch(err => {
-        alert("Gagal upload: " + err.message);
+      jsonData.forEach((pelanggan) => {
+        const newRef = db.ref("pelanggan").push(); // Buat ID unik
+        uploadPromises.push(newRef.set(pelanggan));
       });
+
+      Promise.all(uploadPromises)
+        .then(() => {
+          alert("Data berhasil di-upload ke Realtime Database!");
+          document.getElementById("uploadBox").style.display = "none";
+          document.getElementById("showUpload").style.display = "block";
+          location.reload();
+        })
+        .catch(err => {
+          alert("Gagal upload: " + err.message);
+          console.error(err);
+        });
+
+    } catch (error) {
+      alert("Format file JSON salah. Cek kembali file kamu.");
+      console.error(error);
+    }
   };
+
+  reader.onerror = (error) => {
+    alert("Gagal membaca file JSON: " + error.message);
+    console.error(error);
+  };
+
   reader.readAsText(file);
 }
   </script>
