@@ -1,4 +1,4 @@
-/* Reset dan dasar */
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,44 +18,53 @@ h2 {
   color: #00796b;
   font-size: 2rem;
   margin-bottom: 20px;
-  letter-spacing: 1px;
-  font-weight: 600;
 }
 
 /* Tabel */
-table {
+#tabelPelanggan {
   width: 100%;
   border-collapse: collapse;
-  background: #26a69a;
+  background: white;
   border-radius: 12px;
   overflow: hidden;
-  margin: 20px auto;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  animation: fadeIn 0.5s ease;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-table th {
+#tabelPelanggan th {
   background: linear-gradient(90deg, #26a69a, #009688);
   color: white;
+  text-align: center;
   padding: 14px;
   font-weight: 600;
-  text-align: center;
 }
 
-table td {
+#tabelPelanggan td {
   text-align: center;
   padding: 12px 14px;
   font-size: 0.95rem;
-  transition: background 0.3s;
 }
 
-table tbody tr:hover {
+#tabelPelanggan tbody tr:hover {
   background: #b2dfdb;
   cursor: pointer;
 }
 
-table tbody tr:nth-child(even) {
+#tabelPelanggan tbody tr:nth-child(even) {
   background: #f1f1f1;
+}
+
+/* DataTables controls */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+  margin-top: 10px;
 }
 
 /* Total Harga */
@@ -75,18 +84,13 @@ table tbody tr:nth-child(even) {
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
-}
-
-.upload-box:hover {
-  transform: scale(1.02);
 }
 
 .upload-box h2 {
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   color: #009688;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .upload-header {
@@ -131,7 +135,7 @@ button:hover {
   transform: translateY(-2px);
 }
 
-/* Tombol tampilkan upload */
+/* Tombol tampilkan Upload */
 #showUpload {
   display: none;
   background: #FFC107;
@@ -152,18 +156,17 @@ button:hover {
   transform: scale(1.05);
 }
 
-/* Animasi */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 /* Responsive */
 @media (max-width: 768px) {
-  table {
+  body {
+    padding: 15px;
+  }
+
+  #tabelPelanggan {
     font-size: 0.85rem;
   }
+
   .upload-box {
-    padding: 15px;
+    padding: 20px;
   }
 }
