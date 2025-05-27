@@ -1,0 +1,169 @@
+/* Reset dan dasar */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #e3f2fd, #b2ebf2);
+  color: #333;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h2 {
+  text-align: center;
+  color: #00796b;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* Tabel */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #26a69a;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px auto;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  animation: fadeIn 0.5s ease;
+}
+
+table th {
+  background: linear-gradient(90deg, #26a69a, #009688);
+  color: white;
+  padding: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+table td {
+  text-align: center;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+table tbody tr:hover {
+  background: #b2dfdb;
+  cursor: pointer;
+}
+
+table tbody tr:nth-child(even) {
+  background: #f1f1f1;
+}
+
+/* Total Harga */
+.total {
+  text-align: right;
+  margin-top: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #004d40;
+}
+
+/* Upload Box */
+.upload-box {
+  max-width: 500px;
+  margin: 30px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.upload-box:hover {
+  transform: scale(1.02);
+}
+
+.upload-box h2 {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #009688;
+  margin-bottom: 10px;
+}
+
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#hideUpload {
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  color: #F44336;
+  cursor: pointer;
+}
+
+input[type="file"],
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: background 0.3s, transform 0.2s;
+}
+
+input[type="file"] {
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+button {
+  background: linear-gradient(90deg, #26a69a, #009688);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: linear-gradient(90deg, #009688, #00796b);
+  transform: translateY(-2px);
+}
+
+/* Tombol tampilkan upload */
+#showUpload {
+  display: none;
+  background: #FFC107;
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 220px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: background 0.3s, transform 0.2s;
+}
+
+#showUpload:hover {
+  background: #FFB300;
+  transform: scale(1.05);
+}
+
+/* Animasi */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  table {
+    font-size: 0.85rem;
+  }
+  .upload-box {
+    padding: 15px;
+  }
+}
