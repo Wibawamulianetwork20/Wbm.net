@@ -1,23 +1,25 @@
-/* Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* Global */
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #e3f2fd, #b2ebf2);
-  color: #333;
+  background: linear-gradient(135deg, #74ebd5, #acb6e5);
+  margin: 0;
   padding: 20px;
-  min-height: 100vh;
+  color: #333;
 }
 
-h2 {
+h1, h2 {
   text-align: center;
-  color: #00796b;
-  font-size: 2rem;
+  color: #004d40;
   margin-bottom: 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 /* Tabel */
@@ -25,158 +27,93 @@ h2 {
 #pelangganlunas {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 12px;
+  background: #fff;
+  margin-top: 20px;
+  border-radius: 10px;
   overflow: hidden;
-  margin: 20px 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 #tabelPelanggan th,
 #pelangganlunas th {
-  background: linear-gradient(90deg, #26a69a, #009688);
+  background: linear-gradient(90deg, #00b894, #00cec9);
   color: white;
-  text-align: center;
   padding: 14px;
-  font-weight: 600;
+  text-align: center;
+  font-size: 1rem;
 }
 
 #tabelPelanggan td,
 #pelangganlunas td {
   text-align: center;
-  padding: 12px 14px;
+  padding: 12px;
   font-size: 0.95rem;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-#tabelPelanggan tbody tr:hover,
-#pelangganlunas tbody tr:hover {
-  background: #b2dfdb;
+#tabelPelanggan tr:hover,
+#pelangganlunas tr:hover {
+  background: #d0f0e0;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 #tabelPelanggan tbody tr:nth-child(even),
 #pelangganlunas tbody tr:nth-child(even) {
-  background: #f1f1f1;
+  background: #f9f9f9;
 }
 
-/* DataTables controls */
-.dataTables_wrapper .dataTables_filter input,
-.dataTables_wrapper .dataTables_length select {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
+/* Tombol Aksi */
+button.aksi-btn {
+  padding: 6px 12px;
+  border: none;
   border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_paginate {
-  margin-top: 10px;
+button.bayar {
+  background: #4caf50;
+  color: white;
 }
 
-/* Total Harga */
-.total-info{
+button.edit {
+  background: #f39c12;
+  color: white;
+}
+
+button.hapus {
+  background: #e74c3c;
+  color: white;
+}
+
+button.aksi-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Total Info */
+.total-info {
   text-align: right;
   margin-top: 15px;
   font-size: 1.1rem;
   font-weight: bold;
-  color: #004d40;
-}
-
-.aksi-btn { cursor: pointer; padding: 5px 8px; border: none; border-radius: 5px; color: white; margin: 2px; }
-    .bayar { background: #4CAF50; }
-    .edit { background: #FFC107; color: black; }
-    .hapus { background: #F44336; }
-
-/* Upload Box */
-.upload-box {
-  max-width: 500px;
-  margin: 30px auto;
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-
-.upload-box h2 {
-  text-align: center;
-  font-size: 1.4rem;
-  color: #009688;
-  margin-bottom: 15px;
-}
-
-.upload-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#hideUpload {
-  background: transparent;
-  border: none;
-  font-size: 1.6rem;
-  color: #F44336;
-  cursor: pointer;
-}
-
-input[type="file"],
-button {
-  width: 100%;
-  padding: 12px;
-  margin: 12px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: background 0.3s, transform 0.2s;
-}
-
-input[type="file"] {
-  background: #f0f0f0;
-  cursor: pointer;
-}
-
-button {
-  background: linear-gradient(90deg, #26a69a, #009688);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:hover {
-  background: linear-gradient(90deg, #009688, #00796b);
-  transform: translateY(-2px);
-}
-
-/* Tombol tampilkan Upload */
-#showUpload {
-  display: none;
-  background: #FFC107;
-  color: black;
-  font-weight: bold;
-  text-align: center;
-  margin: 20px auto;
-  max-width: 220px;
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: background 0.3s, transform 0.2s;
-}
-
-#showUpload:hover {
-  background: #FFB300;
-  transform: scale(1.05);
+  color: #00695c;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  body {
+  table, th, td {
+    font-size: 0.9rem;
+  }
+
+  button.aksi-btn {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+
+  .container {
     padding: 15px;
-  }
-
-  #tabelPelanggan {
-    font-size: 0.85rem;
-  }
-
-  .upload-box {
-    padding: 20px;
   }
 }
