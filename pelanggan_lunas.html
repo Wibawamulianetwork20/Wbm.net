@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pelanggan Lunas</title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="data_pelanggan.css" type="text/css" media="all" />
+</head>
+<body>
+  <h2>Data Pelanggan Lunas</h2>
+
+  <table id="tabelPelanggan" class="display">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>Paket</th>
+        <th>Keterangan</th>
+        <th>Harga</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="total">
+    Total Harga: <span id="totalHarga">Rp 0</span>
+  </div>
+
+  <!-- Firebase + Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.firebasestorage.app",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let totalHarga = 0;
+    let no = 1;
+    let dataPelanggan = [];
+
+    db.ref("pelangganlunas").once("value").then(snapshot => {
+      snapshot.forEach(childSnapshot => {
+        const data = childSnapshot.val();
+        const id = childSnapshot.key;
+        dataPelanggan.push(`
+          <tr>
+            <td>${no++}</td>
+            <td>${data.nama || ''}</td>
+            <td>${data.paket || ''}</td>
+            <td>${data.keterangan || ''}</td>
+            <td>Rp ${data.harga || '0'}</td>
+            <td>
+              <button class="aksi-btn hapus" onclick="kembalikanPelanggan('${id}')">Kembalikan</button>
+            </td>
+          </tr>
+        `);
+        totalHarga += parseInt(data.harga) || 0;
+      });
+
+      document.querySelector("#tabelPelanggan tbody").innerHTML = dataPelanggan.join('');
+      document.getElementById("totalHarga").innerText = `Rp ${totalHarga.toLocaleString()}`;
+
+      $('#tabelPelanggan').DataTable({
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]]
+      });
+    });
+
+    function kembalikanPelanggan(id) {
+      db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
+        const data = snapshot.val();
+        db.ref('pelanggan/' + id).set(data).then(() => {
+          db.ref('pelangganlunas/' + id).remove();
+          alert("Data pelanggan berhasil dikembalikan!");
+          location.reload();
+        });
+      });
+    }
+  </script>
+</body>
+</html>
