@@ -11,6 +11,15 @@
   <script src="login_register.js" defer></script>
 </head>
 <body>
+
+<video id="videoIklan" autoplay loop playsinline width="90%" style="border-radius: 12px;">
+  <source src="Wifi.mp4" type="video/mp4">
+  Browser Anda tidak mendukung pemutaran video.
+</video>
+
+<button id="btnSuara">Hidupkan Suara</button>
+
+  
   <div class="container">
     <h2>Login</h2>
     <form id="login-form">
@@ -20,5 +29,21 @@
       <button type="submit">Login</button>
     </form>
   </div>
+
+  <script>
+  const video = document.getElementById('videoIklan');
+  const btnSuara = document.getElementById('btnSuara');
+
+  btnSuara.addEventListener('click', () => {
+    if (video.muted) {
+      video.muted = false;
+      video.volume = 0.5;
+      btnSuara.textContent = 'Matikan Suara';
+    } else {
+      video.muted = true;
+      btnSuara.textContent = 'Hidupkan Suara';
+    }
+  });
+</script>
 </body>
 </html>
