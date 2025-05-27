@@ -39,8 +39,6 @@
     // Firebase Config (Ganti dengan milikmu)
     const firebaseConfig = {
       apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
-    // Firebase Config
-      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
       authDomain: "wibawamulianetwork.firebaseapp.com",
       databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "wibawamulianetwork",
@@ -53,7 +51,7 @@
 // Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database(); // Realtime Database
-
+    
 // Fungsi Upload JSON ke Realtime Database
 function uploadData() {
   console.log("Fungsi uploadData dipanggil");
