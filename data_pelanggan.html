@@ -146,15 +146,33 @@
     }
 
     function bayarPelanggan(id) {
-      db.ref('pelanggan/' + id).once('value').then(snapshot => {
-        const data = snapshot.val();
-        db.ref('pelangganlunas/' + id).set(data).then(() => {
-          db.ref('pelanggan/' + id).remove();
-          alert("Pelanggan berhasil dibayar!");
+  // Ambil data dari node 'pelanggan' berdasarkan ID
+  db.ref('pelanggan/' + id).once('value')
+    .then(snapshot => {
+      const data = snapshot.val();
+      if (!data) {
+        alert("Data pelanggan tidak ditemukan!");
+        return;
+      }
+
+      // Salin data ke node 'pelangganlunas'
+      db.ref('pelangganlunas/' + id).set(data)
+        .then(() => {
+          // Hapus data dari 'pelanggan'
+          return db.ref('pelanggan/' + id).remove();
+        })
+        .then(() => {
+          alert("Data berhasil dipindahkan ke pelangganlunas!");
           location.reload();
+        })
+        .catch(err => {
+          alert("Terjadi kesalahan: " + err.message);
         });
-      });
-    }
+    })
+    .catch(err => {
+      alert("Gagal mengambil data: " + err.message);
+    });
+}
 
     function editPelanggan(id) {
       const newNama = prompt("Masukkan nama baru:");
