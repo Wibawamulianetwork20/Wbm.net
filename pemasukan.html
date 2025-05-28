@@ -7,19 +7,22 @@
   <link rel="stylesheet" href="pemasukan.css" />
 </head>
 <body>
-
-  <h1>Dashboard Pemasukan</h1>
+  
+  <h2>Dashboard Pemasukan</h2>
 
   <table>
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Kategori</th>
-        <th>Harga</th>
-        <th>Metode</th>
-      </tr>
-    </thead>
-    <tbody id="tabelPemasukan"></tbody>
+    <tr>
+      <td><b>Total Pemasukan</b></td>
+      <td id="totalPemasukan">Rp 0</td>
+    </tr>
+    <tr>
+      <td><b>Pemasukan Langganan Cash</b></td>
+      <td id="totalCash">Rp 0</td>
+    </tr>
+    <tr>
+      <td><b>Pemasukan Langganan Transfer</b></td>
+      <td id="totalTransfer">Rp 0</td>
+    </tr>
   </table>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -37,52 +40,40 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    db.ref('pemasukan').once('value').then(snapshot => {
-  let total = 0;
-  let langgananCash = 0;
-  let langgananTransfer = 0;
-  let no = 1;
-  const tbody = document.getElementById("tabelPemasukan");
-  tbody.innerHTML = "";  // Clear table before loading data
-
-  if (!snapshot.exists()) {
-    tbody.innerHTML = "<tr><td colspan='4'>Tidak ada data pemasukan</td></tr>";
-    document.getElementById("totalPemasukan").innerText = "Rp 0";
-    document.getElementById("langgananCash").innerText = "Rp 0";
-    document.getElementById("langgananTransfer").innerText = "Rp 0";
-    return;  // Exit if no data
+     function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
   }
 
-  snapshot.forEach(child => {
-    const data = child.val();
-    const harga = parseInt(data.harga) || 0;
-    const metode = (data.metode || "-").toLowerCase();
-    const kategori = (data.kategori || "-").toLowerCase();
+  // Update total harga
+  function updatePemasukan() {
+    const pelangganRef = ref(db, 'pelangganlunas');
+    let totalCash = 0;
+    let totalTransfer = 0;
 
-    total += harga;
+    onValue(pelangganRef, (snapshot) => {
+      totalCash = 0;
+      totalTransfer = 0;
 
-    if (kategori.includes('langganan')) {
-      if (metode.includes('tunai') || metode.includes('cash')) {
-        langgananCash += harga;
-      } else if (metode.includes('transfer')) {
-        langgananTransfer += harga;
-      }
-    }
+      snapshot.forEach(childSnapshot => {
+        const data = childSnapshot.val();
+        const harga = parseInt(data.harga) || 0;
+        const metode = data.metode || 'cash';
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${no++}</td>
-      <td>${kategori}</td>
-      <td>Rp ${harga.toLocaleString()}</td>
-      <td>${metode}</td>
-    `;
-    tbody.appendChild(row);
-  });
+        if (metode.toLowerCase() === 'cash' || metode.toLowerCase() === 'tunai') {
+          totalCash += harga;
+        } else {
+          totalTransfer += harga;
+        }
+      });
 
-  document.getElementById("totalPemasukan").innerText = "Rp " + total.toLocaleString();
-  document.getElementById("langgananCash").innerText = "Rp " + langgananCash.toLocaleString();
-  document.getElementById("langgananTransfer").innerText = "Rp " + langgananTransfer.toLocaleString();
-});
+      document.getElementById('totalPemasukan').innerText = formatRupiah(totalCash + totalTransfer);
+      document.getElementById('totalCash').innerText = formatRupiah(totalCash);
+      document.getElementById('totalTransfer').innerText = formatRupiah(totalTransfer);
+    });
+  }
+
+  // Inisialisasi
+  updatePemasukan();
   </script>
 
 </body>
