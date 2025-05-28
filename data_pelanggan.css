@@ -59,6 +59,23 @@ h2 {
 }
 
 /* Tabel Pelanggan */
+.table-container {
+  max-width: 1000px; /* Batas lebar tabel */
+  margin: 0 auto; /* Tengah horizontal */
+  padding: 0 20px; /* Padding kiri-kanan */
+  overflow-x: auto; /* Biar scroll kalau kecil */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  margin: 0;
+}
+
 #tabelPelanggan {
   width: 100%;
   border-collapse: collapse;
