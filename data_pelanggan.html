@@ -80,21 +80,20 @@
 
     // Bayar (pindah ke pelangganlunas + faktur)
     function bayarPelanggan(id) {
-      db.ref('pelanggan/' + id).once('value')
-        .then(snapshot => {
-          const data = snapshot.val();
-          if (!data) {
-            alert("Data tidak ditemukan!");
-            return;
-          }
-          db.ref('pelangganlunas/' + id).set(data)
-            .then(() => db.ref('pelanggan/' + id).remove())
-            .then(() => {
-              alert("Data dipindahkan ke pelangganlunas!");
-              buatFaktur(data, id);
-            });
-        });
+  db.ref('pelanggan/' + id).once('value').then(snapshot => {
+    const data = snapshot.val();
+    if (!data) {
+      alert("Data tidak ditemukan!");
+      return;
     }
+    db.ref('pelangganlunas/' + id).set(data)  // <-- Semua data dipindahkan
+      .then(() => db.ref('pelanggan/' + id).remove())
+      .then(() => {
+        alert("Data dipindahkan ke pelangganlunas!");
+        buatFaktur(data, id);
+      });
+  });
+}
 
     function buatFaktur(data, id) {
   const fakturWindow = window.open('', 'Faktur', 'width=800,height=1000');
