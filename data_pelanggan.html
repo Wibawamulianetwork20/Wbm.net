@@ -104,11 +104,12 @@
       <title>Faktur Pembayaran</title>
       <style>
         @page { size: A4; margin: 20mm; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f7f7f7; padding: 0; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f7f7f7; padding: 0; margin: 0; }
         .faktur-container { max-width: 800px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
-        .faktur-header { text-align: center; margin-bottom: 20px; }
-        .faktur-header h1 { margin: 0; color: #2c3e50; }
-        .faktur-header p { margin: 5px 0; font-size: 14px; color: #555; }
+        .faktur-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .faktur-header h1 { margin: 0; color: #2c3e50; font-size: 28px; }
+        .faktur-header img { width: 80px; height: auto; }
+        h3 { text-align: center; color: #34495e; margin-top: 30px; }
         .faktur-info p { margin: 5px 0; font-size: 15px; }
         .faktur-table table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .faktur-table th, .faktur-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
@@ -123,8 +124,7 @@
       <div class="faktur-container">
         <div class="faktur-header">
           <h1>e-Billing System</h1>
-          <p>WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
-          <p>Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
+          <img src="wbm1.jpg" alt="Logo">
         </div>
         <h3>Bukti Pembayaran</h3>
         <div class="faktur-info">
@@ -138,7 +138,7 @@
         <div class="lunas">LUNAS</div>
         <div class="faktur-footer">
           <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
-          <p>Faktur ini dicetak secara otomatis oleh sistem e-Billing.</p>
+          <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
           <button class="btn-download" onclick="window.print()">🖨️ Cetak Faktur</button>
         </div>
       </div>
@@ -147,7 +147,6 @@
   `);
   fakturWindow.document.close();
 }
-
     // Edit
     function editPelanggan(id) {
       db.ref('pelanggan/' + id).once('value')
