@@ -67,6 +67,18 @@
     const totalLunas = snapshot.size || snapshot.numChildren();
     document.getElementById("pelangganLunas").innerText = totalLunas;
   });
+
+  // Total Pemasukan
+database.ref('pelangganlunas').once('value').then(snapshot => {
+  let totalPemasukan = 0;
+  snapshot.forEach(child => {
+    const data = child.val();
+    if (data.harga) {
+      totalPemasukan += parseInt(data.harga);
+    }
+  });
+  document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
+});
 </script>
   
 </body>
