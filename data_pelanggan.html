@@ -30,6 +30,20 @@
   </table>
 </div>
 
+  <!-- Modal Pilihan Metode Pembayaran -->
+<div id="modalMetode" class="modal">
+  <div class="modal-content">
+    <h3>Pilih Metode Pembayaran</h3>
+    <select id="metodePembayaran">
+      <option value="Tunai">Tunai</option>
+      <option value="Transfer">Transfer</option>
+      <option value="QRIS">QRIS</option>
+    </select>
+    <button onclick="konfirmasiBayar()">Bayar</button>
+    <button onclick="tutupModal()">Batal</button>
+  </div>
+</div>
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -46,6 +60,7 @@
       appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
     };
     firebase.initializeApp(firebaseConfig);
+    let idPelangganDipilih = null;
     const db = firebase.database();
 
     function tampilData() {
@@ -74,32 +89,31 @@
       });
     }
 
-    function bayarPelanggan(id) {
-  // Prompt muncul di sini
-  const metode = prompt("Masukkan metode pembayaran (Tunai / Transfer / QRIS):");
-  
-  if (!metode) {
-    alert("Pembayaran dibatalkan!");
-    return;
-  }
+function bayarPelanggan(id) {
+  idPelangganDipilih = id;
+  document.getElementById("modalMetode").style.display = "block";
+}
 
-  db.ref('pelanggan/' + id).once('value').then(snapshot => {
+function tutupModal() {
+  document.getElementById("modalMetode").style.display = "none";
+  idPelangganDipilih = null;
+}
+
+function konfirmasiBayar() {
+  const metode = document.getElementById("metodePembayaran").value;
+  if (!idPelangganDipilih) return;
+
+  db.ref('pelanggan/' + idPelangganDipilih).once('value').then(snapshot => {
     const data = snapshot.val();
-    data.metode = metode; // Tambahkan field metode pembayaran
+    data.metode = metode;
 
-    db.ref('pelangganlunas/' + id).set(data).then(() => {
-      db.ref('pelanggan/' + id).remove();
+    db.ref('pelangganlunas/' + idPelangganDipilih).set(data).then(() => {
+      db.ref('pelanggan/' + idPelangganDipilih).remove();
       alert("Data dipindahkan ke pelanggan lunas dengan metode: " + metode);
+      tutupModal();
     });
   });
 }
-      db.ref('pelanggan/' + id).once('value').then(snapshot => {
-        db.ref('pelangganlunas/' + id).set(snapshot.val()).then(() => {
-          db.ref('pelanggan/' + id).remove();
-          alert("Data dipindahkan ke pelanggan lunas!");
-        });
-      });
-    }
 
     function editPelanggan(id) {
       db.ref('pelanggan/' + id).once('value').then(snapshot => {
