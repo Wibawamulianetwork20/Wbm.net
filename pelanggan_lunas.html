@@ -103,33 +103,25 @@ function lihatFaktur(id) {
     const fakturWindow = window.open('', 'Faktur', 'width=800,height=1000');
     fakturWindow.document.write(`
       <html>
-      <head>
-        <title>Faktur Pembayaran</title>
-        <style>
-          @page { size: A4; margin: 20mm; }
-        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
-        .faktur-container { max-width: 800px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
-        .faktur-header { display: flex; justify-content: space-between; align-items: center; }
-        .faktur-header h1 { margin: 0; color: #2c3e50; font-size: 28px; }
-        .faktur-header img { width: 80px; height: auto; }
-        .faktur-info-text { margin-top: 5px; font-size: 14px; color: #555; }
-        h3 { text-align: center; color: #34495e; margin-top: 30px; }
-        .faktur-info p { margin: 5px 0; font-size: 15px; }
-        .lunas { text-align: center; color: green; font-weight: bold; margin-top: 20px; font-size: 18px; }
-        .faktur-footer { text-align: center; margin-top: 40px; font-size: 14px; color: #666; }
-        .btn-download { display: inline-block; background: #3498db; color: white; padding: 10px 20px; margin-top: 20px; text-decoration: none; border-radius: 5px; }
-        .btn-download:hover { background: #2980b9; }
-      </style>
-    </head>
-    <body>
-      <div class="faktur-container">
-        <div class="faktur-header">
-          <div>
-            <h1>e-Billing System</h1>
-            <p class="faktur-info-text">WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
-            <p class="faktur-info-text">Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
+      <head>...</head>
+      <body>
+        <div class="faktur-container">
+          <div class="faktur-header">
+            <div>
+              <h1>e-Billing System</h1>
+              <p class="faktur-info-text">WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
+              <p class="faktur-info-text">Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
+            </div>
+            <img src="wbm1.jpg" alt="Logo">
           </div>
-          <img src="wbm1.jpg" alt="Logo">
+          <h3>Bukti Pembayaran</h3>
+          <div class="faktur-info">
+            <p><strong>ID Pelanggan:</strong> ${id}</p>
+            <p><strong>Nama:</strong> ${data.nama}</p>
+            <p><strong>Paket:</strong> ${data.paket}</p>
+            <p><strong>Keterangan:</strong> ${data.keterangan}</p>
+            <p><strong>Harga:</strong> Rp ${data.harga}</p>
+            <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
           </div>
           <div class="lunas">LUNAS</div>
           <div class="faktur-footer">
