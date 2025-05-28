@@ -1,4 +1,4 @@
-/* Animasi Background */
+/* Animasi Background Gradient */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -15,12 +15,13 @@ body {
   color: #333;
 }
 
-/* Judul */
+/* Judul Halaman */
 h2 {
   text-align: center;
-  color: #004d40;
-  font-size: 2rem;
-  margin-bottom: 20px;
+  color: #fff;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 /* Upload JSON & Hapus Duplikat */
@@ -28,16 +29,18 @@ h2 {
   display: inline-block;
   margin: 10px;
   padding: 10px 20px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-weight: bold;
 }
 
 #jsonFile {
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 2px solid #fff;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
 }
 
 .btn-upload {
@@ -55,52 +58,57 @@ h2 {
   opacity: 0.9;
 }
 
-/* Tabel */
+/* Tabel Pelanggan */
 #tabelPelanggan {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  background: white;
+  margin-top: 30px;
+  background: rgba(255,255,255,0.95);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
 
 #tabelPelanggan th {
   background: linear-gradient(90deg, #26a69a, #009688);
   color: white;
-  padding: 14px;
+  padding: 16px;
+  font-size: 1rem;
+  letter-spacing: 1px;
 }
 
 #tabelPelanggan td {
   text-align: center;
-  padding: 12px;
+  padding: 14px;
   font-size: 0.95rem;
 }
 
 #tabelPelanggan tbody tr:nth-child(even) {
-  background: #f9f9f9;
+  background: #f2f2f2;
 }
 
 #tabelPelanggan tbody tr:hover {
-  background: #d0f0e0;
+  background: rgba(38,166,154,0.2);
   cursor: pointer;
+  transition: 0.3s;
 }
 
-/* Tombol Aksi */
+/* Tombol Aksi di Tabel */
 .aksi-btn {
   padding: 6px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.85rem;
+  font-weight: bold;
   cursor: pointer;
-  margin: 0 2px;
+  margin: 2px;
   transition: all 0.3s ease;
+  color: white;
 }
 
-.aksi-btn.bayar { background: #4caf50; color: white; }
-.aksi-btn.edit { background: #f39c12; color: white; }
-.aksi-btn.hapus { background: #e74c3c; color: white; }
+.aksi-btn.bayar { background: #4caf50; }
+.aksi-btn.edit { background: #f39c12; }
+.aksi-btn.hapus { background: #e74c3c; }
 
 .aksi-btn:hover {
   transform: scale(1.1);
@@ -110,24 +118,31 @@ h2 {
 /* Total Harga */
 #totalHarga {
   font-weight: bold;
-  font-size: 1.1rem;
-  color: #00695c;
-  margin-top: 20px;
+  font-size: 1.2rem;
+  color: #f1f1f1;
   text-align: right;
+  margin-top: 20px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   h2 {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
+  }
+
+  #jsonFile, .btn {
+    width: 100%;
+    margin: 10px 0;
   }
 
   #tabelPelanggan th, #tabelPelanggan td {
     font-size: 0.85rem;
+    padding: 10px;
   }
 
-  .btn, .aksi-btn {
-    width: 100%;
-    margin: 10px 0;
+  .aksi-btn {
+    padding: 5px 8px;
+    font-size: 0.75rem;
   }
 }
