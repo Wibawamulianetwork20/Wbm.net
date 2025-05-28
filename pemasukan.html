@@ -40,40 +40,38 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-     function formatRupiah(angka) {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
-  }
+    // Format Rupiah
+    function formatRupiah(angka) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
+    }
 
-  // Update total harga
-  function updatePemasukan() {
-    const pelangganRef = ref(db, 'pelangganlunas');
-    let totalCash = 0;
-    let totalTransfer = 0;
+    // Update Total Pemasukan
+    function updatePemasukan() {
+      const pelangganRef = db.ref('pelangganlunas');
+      pelangganRef.on('value', (snapshot) => {
+        let totalCash = 0;
+        let totalTransfer = 0;
 
-    onValue(pelangganRef, (snapshot) => {
-      totalCash = 0;
-      totalTransfer = 0;
+        snapshot.forEach(childSnapshot => {
+          const data = childSnapshot.val();
+          const harga = parseInt(data.harga) || 0;
+          const metode = (data.metode || 'cash').toLowerCase();
 
-      snapshot.forEach(childSnapshot => {
-        const data = childSnapshot.val();
-        const harga = parseInt(data.harga) || 0;
-        const metode = data.metode || 'cash';
+          if (metode === 'cash' || metode === 'tunai') {
+            totalCash += harga;
+          } else {
+            totalTransfer += harga;
+          }
+        });
 
-        if (metode.toLowerCase() === 'cash' || metode.toLowerCase() === 'tunai') {
-          totalCash += harga;
-        } else {
-          totalTransfer += harga;
-        }
+        document.getElementById('totalPemasukan').innerText = formatRupiah(totalCash + totalTransfer);
+        document.getElementById('totalCash').innerText = formatRupiah(totalCash);
+        document.getElementById('totalTransfer').innerText = formatRupiah(totalTransfer);
       });
+    }
 
-      document.getElementById('totalPemasukan').innerText = formatRupiah(totalCash + totalTransfer);
-      document.getElementById('totalCash').innerText = formatRupiah(totalCash);
-      document.getElementById('totalTransfer').innerText = formatRupiah(totalTransfer);
-    });
-  }
-
-  // Inisialisasi
-  updatePemasukan();
+    // Panggil Function
+    updatePemasukan();
   </script>
 
 </body>
