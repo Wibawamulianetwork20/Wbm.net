@@ -107,10 +107,20 @@ function konfirmasiBayar() {
     const data = snapshot.val();
     data.metode = metode;
 
+    // Tambahkan ke pelangganlunas
     db.ref('pelangganlunas/' + idPelangganDipilih).set(data).then(() => {
-      db.ref('pelanggan/' + idPelangganDipilih).remove();
-      alert("Data dipindahkan ke pelanggan lunas dengan metode: " + metode);
-      tutupModal();
+      // Tambahkan juga ke pemasukan
+      db.ref('pemasukan').push({
+        kategori: 'langganan',
+        harga: data.harga,
+        metode: metode
+      }).then(() => {
+        // Hapus dari pelanggan
+        db.ref('pelanggan/' + idPelangganDipilih).remove();
+        alert("Data dipindahkan ke pelanggan lunas dan tercatat di pemasukan dengan metode: " + metode);
+        tutupModal();
+        location.reload();
+      });
     });
   });
 }
