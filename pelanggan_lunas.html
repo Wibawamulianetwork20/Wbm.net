@@ -19,6 +19,7 @@
         <th>Paket</th>
         <th>Keterangan</th>
         <th>Harga</th>
+        <th>metode</th>
         <th>Aksi</th>
       </tr>
     </thead>
@@ -60,6 +61,7 @@
               <td>${p.paket}</td>
               <td>${p.keterangan}</td>
               <td>Rp ${p.harga}</td>
+              <td>${p.metode}</td>
               <td>
                 <button onclick="kembalikanPelanggan('${child.key}')">Kembali</button>
                 <button onclick="lihatFaktur('${child.key}')">Faktur</button>
