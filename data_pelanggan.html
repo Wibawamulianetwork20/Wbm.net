@@ -104,16 +104,14 @@
       <title>Faktur Pembayaran</title>
       <style>
         @page { size: A4; margin: 20mm; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f7f7f7; padding: 0; margin: 0; }
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
         .faktur-container { max-width: 800px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
-        .faktur-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .faktur-header { display: flex; justify-content: space-between; align-items: center; }
         .faktur-header h1 { margin: 0; color: #2c3e50; font-size: 28px; }
         .faktur-header img { width: 80px; height: auto; }
+        .faktur-info-text { margin-top: 5px; font-size: 14px; color: #555; }
         h3 { text-align: center; color: #34495e; margin-top: 30px; }
         .faktur-info p { margin: 5px 0; font-size: 15px; }
-        .faktur-table table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .faktur-table th, .faktur-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .faktur-table th { background: #3498db; color: white; }
         .lunas { text-align: center; color: green; font-weight: bold; margin-top: 20px; font-size: 18px; }
         .faktur-footer { text-align: center; margin-top: 40px; font-size: 14px; color: #666; }
         .btn-download { display: inline-block; background: #3498db; color: white; padding: 10px 20px; margin-top: 20px; text-decoration: none; border-radius: 5px; }
@@ -123,12 +121,16 @@
     <body>
       <div class="faktur-container">
         <div class="faktur-header">
-          <h1>e-Billing System</h1>
-          <p>WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
-          <p>Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
-          <img src="wbm1.jpg" alt="Logo">
+          <div>
+            <h1>e-Billing System</h1>
+            <p class="faktur-info-text">WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
+            <p class="faktur-info-text">Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
+          </div>
+          <img src="https://via.placeholder.com/80x80.png?text=Logo" alt="Logo">
         </div>
+
         <h3>Bukti Pembayaran</h3>
+
         <div class="faktur-info">
           <p><strong>ID Pelanggan:</strong> ${id}</p>
           <p><strong>Nama:</strong> ${data.nama}</p>
@@ -137,7 +139,9 @@
           <p><strong>Harga:</strong> Rp ${data.harga}</p>
           <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
         </div>
+
         <div class="lunas">LUNAS</div>
+
         <div class="faktur-footer">
           <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
           <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
