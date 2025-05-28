@@ -1,4 +1,3 @@
-<!-- data_pelanggan.html Final - tanpa Faktur -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Data Pelanggan</title>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" />
-  <link rel="stylesheet" href="data_pelanggan.css" />
+  <link rel="stylesheet" href="data_pelanggan.css" type="text/css" media="all" />
 </head>
 <body>
   <h2>Data Pelanggan</h2>
+
   <input type="file" id="jsonFile" accept=".json" />
   <button class="btn" onclick="uploadData()">Upload JSON</button>
   <button class="btn" onclick="hapusDuplikat()">Hapus Duplikat</button>
@@ -34,7 +34,15 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <script>
-    const firebaseConfig = { /*...config...*/ };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.appspot.com",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -54,9 +62,9 @@
               <td>${data.keterangan}</td>
               <td>${data.harga}</td>
               <td>
-                <button onclick="bayarPelanggan('${id}')">Bayar</button>
-                <button onclick="editPelanggan('${id}')">Edit</button>
-                <button onclick="hapusPelanggan('${id}')">Hapus</button>
+                <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
+                <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
+                <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
               </td>
             </tr>`;
         });
@@ -73,8 +81,66 @@
       });
     }
 
-    function editPelanggan(id) { /*...edit fungsi sama...*/ }
-    function hapusPelanggan(id) { /*...hapus fungsi sama...*/ }
+    function editPelanggan(id) {
+      db.ref('pelanggan/' + id).once('value').then(snapshot => {
+        const data = snapshot.val();
+        const nama = prompt("Nama:", data.nama);
+        const paket = prompt("Paket:", data.paket);
+        const keterangan = prompt("Keterangan:", data.keterangan);
+        const harga = prompt("Harga:", data.harga);
+        if (nama && paket && keterangan && harga) {
+          db.ref('pelanggan/' + id).update({ nama, paket, keterangan, harga });
+          alert("Data berhasil diubah!");
+        }
+      });
+    }
+
+    function hapusPelanggan(id) {
+      if (confirm("Hapus data ini?")) {
+        db.ref('pelanggan/' + id).remove();
+        alert("Data dihapus!");
+      }
+    }
+
+    function uploadData() {
+      const fileInput = document.getElementById('jsonFile');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Pilih file JSON terlebih dahulu!');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+          const dbRef = db.ref('pelanggan');
+          for (let key in jsonData) {
+            dbRef.push(jsonData[key]);
+          }
+          alert('Data JSON berhasil diupload!');
+        } catch (err) {
+          alert('Format file JSON salah!');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function hapusDuplikat() {
+      const ref = db.ref('pelanggan');
+      const seen = {};
+      ref.once('value').then(snapshot => {
+        snapshot.forEach(child => {
+          const data = child.val();
+          const key = data.nama + '-' + data.paket;
+          if (seen[key]) {
+            db.ref('pelanggan/' + child.key).remove();
+          } else {
+            seen[key] = true;
+          }
+        });
+        alert('Data duplikat dihapus!');
+      });
+    }
 
     document.addEventListener('DOMContentLoaded', tampilData);
   </script>
