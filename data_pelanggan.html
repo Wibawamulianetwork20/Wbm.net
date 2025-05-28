@@ -75,6 +75,24 @@
     }
 
     function bayarPelanggan(id) {
+  // Prompt muncul di sini
+  const metode = prompt("Masukkan metode pembayaran (Tunai / Transfer / QRIS):");
+  
+  if (!metode) {
+    alert("Pembayaran dibatalkan!");
+    return;
+  }
+
+  db.ref('pelanggan/' + id).once('value').then(snapshot => {
+    const data = snapshot.val();
+    data.metode = metode; // Tambahkan field metode pembayaran
+
+    db.ref('pelangganlunas/' + id).set(data).then(() => {
+      db.ref('pelanggan/' + id).remove();
+      alert("Data dipindahkan ke pelanggan lunas dengan metode: " + metode);
+    });
+  });
+}
       db.ref('pelanggan/' + id).once('value').then(snapshot => {
         db.ref('pelangganlunas/' + id).set(snapshot.val()).then(() => {
           db.ref('pelanggan/' + id).remove();
