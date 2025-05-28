@@ -245,16 +245,6 @@ function lihatFaktur(id) {
   const linkWa = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
   window.open(linkWa, '_blank');
 }
-
-  // Contoh panggil fungsi saat halaman faktur sudah diisi
-  // Sesuaikan dengan data faktur dinamis kamu
-  const nama = document.querySelector('#namaFaktur').innerText;
-  const paket = document.querySelector('#paketFaktur').innerText;
-  const harga = document.querySelector('#hargaFaktur').innerText;
-  const keterangan = document.querySelector('#keteranganFaktur').innerText;
-  const tanggal = document.querySelector('#tanggalFaktur').innerText;
-
-  updateWhatsAppLink(id, nama, paket, harga, keterangan, tanggal);
   
   </script>
 </body>
