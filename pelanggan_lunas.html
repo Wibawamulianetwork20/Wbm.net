@@ -57,15 +57,18 @@ function loadPelangganLunas() {
     snapshot.forEach(child => {
       const pelanggan = child.val();
       data += `
-        <tr>
-          <td>${no++}</td>
-          <td>${pelanggan.nama}</td>
-          <td>${pelanggan.paket}</td>
-          <td>${pelanggan.keterangan}</td>
-          <td>Rp ${pelanggan.harga}</td>
-          <td><button onclick="kembalikanPelanggan('${child.key}')">Kembalikan</button></td>
-        </tr>
-      `;
+  <tr>
+    <td>${no++}</td>
+    <td>${pelanggan.nama}</td>
+    <td>${pelanggan.paket}</td>
+    <td>${pelanggan.keterangan}</td>
+    <td>Rp ${pelanggan.harga}</td>
+    <td>
+      <button onclick="kembalikanPelanggan('${child.key}')">🔙</button>
+      <button onclick="lihatFaktur('${child.key}')">🧾</button>
+    </td>
+  </tr>
+`;
     });
     tbody.innerHTML = data;
   }, (error) => {
@@ -88,6 +91,64 @@ function kembalikanPelanggan(id) {
 }
 
 document.addEventListener('DOMContentLoaded', loadPelangganLunas);
+    
+function lihatFaktur(id) {
+  db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
+    const data = snapshot.val();
+    if (!data) {
+      alert('Data tidak ditemukan.');
+      return;
+    }
+
+    const fakturWindow = window.open('', 'Faktur', 'width=800,height=1000');
+    fakturWindow.document.write(`
+      <html>
+      <head>
+        <title>Faktur Pembayaran</title>
+        <style>
+          @page { size: A4; margin: 20mm; }
+          body { font-family: Arial, sans-serif; background: #f7f7f7; padding: 0; margin: 0; }
+          .faktur-container { max-width: 800px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
+          .faktur-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+          .faktur-header h1 { margin: 0; color: #2c3e50; font-size: 28px; }
+          .faktur-header img { width: 80px; height: auto; }
+          h3 { text-align: center; color: #34495e; margin-top: 30px; }
+          .faktur-info p { margin: 5px 0; font-size: 15px; }
+          .lunas { text-align: center; color: green; font-weight: bold; margin-top: 20px; font-size: 18px; }
+          .faktur-footer { text-align: center; margin-top: 40px; font-size: 14px; color: #666; }
+          .btn-download { display: inline-block; background: #3498db; color: white; padding: 10px 20px; margin-top: 20px; text-decoration: none; border-radius: 5px; }
+          .btn-download:hover { background: #2980b9; }
+        </style>
+      </head>
+      <body>
+        <div class="faktur-container">
+          <div class="faktur-header">
+            <h1>e-Billing System</h1>
+            <img src="https://via.placeholder.com/80x80.png?text=Logo" alt="Logo">
+          </div>
+          <h3>Bukti Pembayaran</h3>
+          <div class="faktur-info">
+            <p><strong>ID Pelanggan:</strong> ${id}</p>
+            <p><strong>Nama:</strong> ${data.nama}</p>
+            <p><strong>Paket:</strong> ${data.paket}</p>
+            <p><strong>Keterangan:</strong> ${data.keterangan}</p>
+            <p><strong>Harga:</strong> Rp ${data.harga}</p>
+            <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
+          </div>
+          <div class="lunas">LUNAS</div>
+          <div class="faktur-footer">
+            <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
+            <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
+            <button class="btn-download" onclick="window.print()">🖨️ Cetak Faktur</button>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+    fakturWindow.document.close();
+  });
+}
+  
   </script>
 </body>
 </html>
