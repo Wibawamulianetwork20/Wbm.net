@@ -60,65 +60,60 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let totalPelanggan = 0;
-  let totalPelangganLunas = 0;
-  let totalPemasukan = 0;
-  let totalPengeluaran = 0;
-  let langgananCash = 0;
-
   function loadDashboardData() {
-    // Total Pelanggan
-    db.ref('pelanggan').once('value').then(snapshot => {
-      totalPelanggan = 0;
-      snapshot.forEach(() => totalPelanggan++);
-      document.getElementById("totalPelanggan").innerText = totalPelanggan;
+  // Total Pelanggan (Aktif)
+  db.ref('pelanggan').once('value').then(snapshot => {
+    let totalPelanggan = snapshot.numChildren();
+    document.getElementById("totalPelanggan").innerText = totalPelanggan;
+  });
+
+  // Total Pelanggan Lunas dan Pemasukan
+  db.ref('pelangganlunas').once('value').then(snapshot => {
+    let totalPelangganLunas = snapshot.numChildren();
+    let totalPemasukan = 0;
+    snapshot.forEach(child => {
+      totalPemasukan += parseInt(child.val().harga) || 0;
     });
+    document.getElementById("pelangganLunas").innerText = totalPelangganLunas;
+    document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
+  });
 
-    // Total Pelanggan Lunas dan Pemasukan
-    db.ref('pelangganlunas').once('value').then(snapshot => {
-      totalPelangganLunas = 0;
-      totalPemasukan = 0;
-      snapshot.forEach(child => {
-        totalPelangganLunas++;
-        totalPemasukan += parseInt(child.val().harga) || 0;
-      });
-      document.getElementById("pelangganLunas").innerText = totalPelangganLunas;
-      document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
+  // Total Pengeluaran
+  db.ref("pengeluaran").once("value").then(snapshot => {
+    let totalPengeluaran = 0;
+    snapshot.forEach(child => {
+      totalPengeluaran += parseInt(child.val().harga) || 0;
     });
+    document.getElementById("totalPengeluaran").innerText = "Rp " + totalPengeluaran.toLocaleString();
+    updateBalance();
+  });
 
-    // Total Pengeluaran
-    db.ref("pengeluaran").once("value").then(snapshot => {
-      totalPengeluaran = 0;
-      snapshot.forEach(child => {
-        totalPengeluaran += parseInt(child.val().harga) || 0;
-      });
-      document.getElementById("totalPengeluaran").innerText = "Rp " + totalPengeluaran.toLocaleString();
-      updateBalance();
+  // Langganan Cash dari pemasukan
+  db.ref("pemasukan").once("value").then(snapshot => {
+    let langgananCash = 0;
+    snapshot.forEach(child => {
+      const data = child.val();
+      const harga = parseInt(data.harga) || 0;
+      const metode = (data.metode || "").toLowerCase();
+      const kategori = (data.kategori || "").toLowerCase();
+
+      if (kategori.includes("langganan") && (metode.includes("tunai") || metode.includes("cash"))) {
+        langgananCash += harga;
+      }
     });
+    window.langgananCash = langgananCash; // simpan untuk updateBalance
+    updateBalance();
+  });
+}
 
-    // Langganan Cash dari pemasukan
-    db.ref("pemasukan").once("value").then(snapshot => {
-      langgananCash = 0;
-      snapshot.forEach(child => {
-        const data = child.val();
-        const harga = parseInt(data.harga) || 0;
-        const metode = (data.metode || "").toLowerCase();
-        const kategori = (data.kategori || "").toLowerCase();
+function updateBalance() {
+  const pengeluaran = document.getElementById("totalPengeluaran").innerText.replace(/[^\d]/g, "") || "0";
+  const pengeluaranNum = parseInt(pengeluaran) || 0;
+  const balance = (window.langgananCash || 0) - pengeluaranNum;
+  document.getElementById("balanceCash").innerText = "Rp " + balance.toLocaleString();
+}
 
-        if (kategori.includes("langganan") && (metode.includes("tunai") || metode.includes("cash"))) {
-          langgananCash += harga;
-        }
-      });
-      updateBalance();
-    });
-  }
-
-  function updateBalance() {
-    const balance = langgananCash - totalPengeluaran;
-    document.getElementById("balanceCash").innerText = "Rp " + balance.toLocaleString();
-  }
-
-  loadDashboardData();
+loadDashboardData();
 </script>
 </body>
 </html>
