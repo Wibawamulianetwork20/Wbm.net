@@ -53,7 +53,7 @@
     authDomain: "wibawamulianetwork.firebaseapp.com",
     databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "wibawamulianetwork",
-    storageBucket: "wibawamulianetwork.firebasestorage.app",
+    storageBucket: "wibawamulianetwork.appspot.com",
     messagingSenderId: "605020393823",
     appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
   };
@@ -61,55 +61,67 @@
   const db = firebase.database();
 
   let langgananCash = 0;
+  let langgananTransfer = 0;
   let totalPengeluaran = 0;
 
-  // Total pelanggan
-  db.ref('pelanggan').once('value').then(snapshot => {
-    const total = snapshot.size || snapshot.numChildren();
-    document.getElementById("totalPelanggan").innerText = total;
-  });
-
-  // Total pelanggan lunas
-  db.ref('pelangganlunas').once('value').then(snapshot => {
-    const totalLunas = snapshot.size || snapshot.numChildren();
-    document.getElementById("pelangganLunas").innerText = totalLunas;
-
-    let totalPemasukan = 0;
-    snapshot.forEach(child => {
-      totalPemasukan += parseInt(child.val().harga) || 0;
+  function loadDashboardData() {
+    // Total Pelanggan
+    db.ref('pelanggan').once('value').then(snapshot => {
+      let total = 0;
+      snapshot.forEach(() => total++);
+      document.getElementById("totalPelanggan").innerText = total;
     });
-    document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
-  });
 
-  // Total Pengeluaran
-let langgananCash = 0;
-let langgananTransfer = 0;
+    // Total Pelanggan Lunas & Pemasukan
+    db.ref('pelangganlunas').once('value').then(snapshot => {
+      let totalLunas = 0;
+      let totalPemasukan = 0;
+      snapshot.forEach(child => {
+        totalLunas++;
+        totalPemasukan += parseInt(child.val().harga) || 0;
+      });
+      document.getElementById("pelangganLunas").innerText = totalLunas;
+      document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
+    });
 
-db.ref("pemasukan").once("value").then(snapshot => {
-  snapshot.forEach(child => {
-    const data = child.val();
-    const harga = parseInt(data.harga) || 0;
-    const metode = (data.metode || "").toLowerCase();
-    const kategori = (data.kategori || "").toLowerCase();
+    // Total Pengeluaran
+    db.ref("pengeluaran").once("value").then(snapshot => {
+      totalPengeluaran = 0;
+      snapshot.forEach(child => {
+        totalPengeluaran += parseInt(child.val().harga) || 0;
+      });
+      document.getElementById("totalPengeluaran").innerText = "Rp " + totalPengeluaran.toLocaleString();
+      updateBalance();
+    });
 
-    if (kategori.includes("langganan")) {
-      if (metode.includes("tunai") || metode.includes("cash")) {
-        langgananCash += harga;
-      } else if (metode.includes("transfer")) {
-        langgananTransfer += harga;
-      }
-    }
-  });
+    // Langganan Cash/Transfer dari pemasukan
+    db.ref("pemasukan").once("value").then(snapshot => {
+      langgananCash = 0;
+      langgananTransfer = 0;
+      snapshot.forEach(child => {
+        const data = child.val();
+        const harga = parseInt(data.harga) || 0;
+        const metode = (data.metode || "").toLowerCase();
+        const kategori = (data.kategori || "").toLowerCase();
 
-  document.getElementById("langgananCash").innerText = "Rp " + langgananCash.toLocaleString();
-  document.getElementById("langgananTransfer").innerText = "Rp " + langgananTransfer.toLocaleString();
-  updateBalance();
-});
-  // Hitung Balance Cash
+        if (kategori.includes("langganan")) {
+          if (metode.includes("tunai") || metode.includes("cash")) {
+            langgananCash += harga;
+          } else if (metode.includes("transfer")) {
+            langgananTransfer += harga;
+          }
+        }
+      });
+      updateBalance();
+    });
+  }
+
   function updateBalance() {
     const balance = langgananCash - totalPengeluaran;
     document.getElementById("balanceCash").innerText = "Rp " + balance.toLocaleString();
   }
+
+  loadDashboardData();
 </script>
 </body>
 </html>
