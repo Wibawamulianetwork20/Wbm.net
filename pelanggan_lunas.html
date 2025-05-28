@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pelanggan Lunas</title>
+  <title>Data Pelanggan Lunas</title>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="pelanggan_lunas.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="pelanggan_lunas.css">
 </head>
 <body>
   <h2>Data Pelanggan Lunas</h2>
-
   <table id="pelangganlunas" class="display">
     <thead>
       <tr>
@@ -23,12 +22,11 @@
     </thead>
     <tbody></tbody>
   </table>
-
   <div class="total">
     Total Harga: <span id="totalHarga">Rp 0</span>
   </div>
 
-  <!-- Firebase + Scripts -->
+  <!-- Firebase & Script -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -40,7 +38,7 @@
       authDomain: "wibawamulianetwork.firebaseapp.com",
       databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "wibawamulianetwork",
-      storageBucket: "wibawamulianetwork.firebasestorage.app",
+      storageBucket: "wibawamulianetwork.appspot.com",
       messagingSenderId: "605020393823",
       appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
     };
@@ -48,186 +46,91 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Mendapatkan data dari pelangganlunas
-function loadPelangganLunas() {
-  const tbody = document.querySelector('#pelangganlunas tbody');
-  db.ref('pelangganlunas').once('value', (snapshot) => {
-    let data = '';
-    let no = 1;
-    snapshot.forEach(child => {
-      const pelanggan = child.val();
-      data += `
-  <tr>
-    <td>${no++}</td>
-    <td>${pelanggan.nama}</td>
-    <td>${pelanggan.paket}</td>
-    <td>${pelanggan.keterangan}</td>
-    <td>Rp ${pelanggan.harga}</td>
-    <td>
-      <button onclick="kembalikanPelanggan('${child.key}')">🔙</button>
-      <button onclick="lihatFaktur('${child.key}')">🧾</button>
-    </td>
-  </tr>
-`;
-    });
-    tbody.innerHTML = data;
-  }, (error) => {
-    alert('Gagal mengambil data: ' + error.message);
-  });
-}
-
-function kembalikanPelanggan(id) {
-  const refLunas = db.ref('pelangganlunas/' + id);
-  refLunas.once('value').then(snapshot => {
-    const data = snapshot.val();
-    db.ref('pelanggan/' + id).set(data, (err) => {
-      if (!err) {
-        refLunas.remove();
-        alert('Data dikembalikan ke pelanggan aktif');
-        loadPelangganLunas();
-      }
-    });
-  });
-}
-
-document.addEventListener('DOMContentLoaded', loadPelangganLunas);
-    
-function lihatFaktur(id) {
-  db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
-    const data = snapshot.val();
-    if (!data) {
-      alert('Data tidak ditemukan.');
-      return;
+    function loadPelangganLunas() {
+      const tbody = document.querySelector('#pelangganlunas tbody');
+      db.ref('pelangganlunas').once('value').then(snapshot => {
+        let data = '', no = 1, total = 0;
+        snapshot.forEach(child => {
+          const p = child.val();
+          total += parseInt(p.harga);
+          data += `
+            <tr>
+              <td>${no++}</td>
+              <td>${p.nama}</td>
+              <td>${p.paket}</td>
+              <td>${p.keterangan}</td>
+              <td>Rp ${p.harga}</td>
+              <td>
+                <button onclick="kembalikanPelanggan('${child.key}')">Kembali</button>
+                <button onclick="lihatFaktur('${child.key}')">Faktur</button>
+              </td>
+            </tr>`;
+        });
+        tbody.innerHTML = data;
+        document.getElementById('totalHarga').innerText = 'Rp ' + total.toLocaleString();
+        $('#pelangganlunas').DataTable();
+      });
     }
 
-    const fakturWindow = window.open('', 'Faktur', 'width=800,height=1000');
-    fakturWindow.document.write(`
-      <html>
-      <head>
-      <title>Faktur Pembayaran</title>
-      <style>
-        @page { size: A4; margin: 0; }
-        body {
-          font-family: 'Segoe UI', Tahoma, sans-serif;
-          background: #f4f4f4;
-          margin: 0;
-          padding: 0;
-        }
-        .faktur-container {
-          width: 210mm;
-          height: 297mm;
-          background: white;
-          padding: 20mm;
-          box-sizing: border-box
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-          border: 1px solid #ddd;
-        }
-        .faktur-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 2px solid #3498db;
-          padding-bottom: 10px;
-          margin-bottom: 20px;
-        }
-        .faktur-header h1 {
-          margin: 0;
-          color: #2c3e50;
-          font-size: 28px;
-        }
-        .faktur-header img {
-          width: 80px;
-          height: auto;
-          border-radius: 8px;
-        }
-        .faktur-header p {
-          font-size: 14px;
-          margin: 4px 0;
-          color: #555;
-        }
-        h3 {
-          text-align: center;
-          color: #34495e;
-          margin-top: 30px;
-          margin-bottom: 20px;
-        }
-        .faktur-info p {
-          margin: 5px 0;
-          font-size: 15px;
-          line-height: 1.6;
-        }
-        .lunas {
-          text-align: center;
-          color: green;
-          font-weight: bold;
-          font-size: 20px;
-          margin-top: 30px;
-        }
-        .paraf {
-          text-align: right;
-          margin-top: 60px;
-          font-size: 16px;
-          font-weight: bold;
-          color: #555;
-        }
-        .faktur-footer {
-          text-align: center;
-          margin-top: 50px;
-          font-size: 14px;
-          color: #666;
-          border-top: 1px dashed #bbb;
-          padding-top: 10px;
-        }
-        .btn-download {
-          display: inline-block;
-          background: #3498db;
-          color: white;
-          padding: 10px 20px;
-          margin-top: 20px;
-          text-decoration: none;
-          border-radius: 5px;
-          font-weight: bold;
-        }
-        .btn-download:hover {
-          background: #2980b9;
-        }
-      </style>
-      </head>
-      <body>
-        <div class="faktur-container">
-          <div class="faktur-header">
+    function kembalikanPelanggan(id) {
+      db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
+        db.ref('pelanggan/' + id).set(snapshot.val(), () => {
+          db.ref('pelangganlunas/' + id).remove();
+          alert('Data dikembalikan ke pelanggan aktif!');
+          location.reload();
+        });
+      });
+    }
+
+    function lihatFaktur(id) {
+      db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
+        const d = snapshot.val();
+        const win = window.open('', '', 'width=800,height=1000');
+        win.document.write(`
+          <html><head><title>Faktur</title>
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3498db; }
+            .header img { width: 70px; }
+            .header h1 { font-size: 24px; margin: 0; }
+            h2 { text-align: center; margin: 20px 0; }
+            p { margin: 4px 0; }
+            .lunas { text-align: center; color: green; font-weight: bold; margin: 20px 0; }
+            .paraf { margin-top: 40px; text-align: right; }
+            .footer { text-align: center; margin-top: 50px; font-size: 13px; color: #777; }
+            .footer button { margin-top: 20px; background: #3498db; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+          </style>
+          </head><body>
+          <div class="header">
             <div>
               <h1>e-Billing System</h1>
-              <p class="faktur-info-text">WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
-              <p class="faktur-info-text">Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
+              <p>WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
+              <p>Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
             </div>
             <img src="wbm1.jpg" alt="Logo">
           </div>
           <h2>Bukti Pembayaran</h2>
-          <div class="faktur-info">
-            <p><strong>ID Pelanggan:</strong> ${id}</p>
-            <p><strong>Nama:</strong> ${data.nama}</p>
-            <p><strong>Paket:</strong> ${data.paket}</p>
-            <p><strong>Keterangan:</strong> ${data.keterangan}</p>
-            <p><strong>Harga:</strong> Rp ${data.harga}</p>
-            <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
-          </div>
+          <p><strong>ID Pelanggan:</strong> ${id}</p>
+          <p><strong>Nama:</strong> ${d.nama}</p>
+          <p><strong>Paket:</strong> ${d.paket}</p>
+          <p><strong>Keterangan:</strong> ${d.keterangan}</p>
+          <p><strong>Harga:</strong> Rp ${d.harga}</p>
+          <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
           <div class="lunas">LUNAS</div>
           <div class="paraf">Paraf: ______________________</div>
-          <p style="text-align:right; font-weight:bold; margin-top:60px;">Admin e-Billing</p>
-          <div class="faktur-footer">
+          <p style="text-align:right; font-weight:bold;">Admin e-Billing</p>
+          <div class="footer">
             <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
             <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
-            <button onclick="this.style.display='none'; window.print();">🖨️ Cetak Faktur</button>
+            <button onclick="this.style.display='none'; window.print();">Cetak Faktur</button>
           </div>
-        </div>
-      </body>
-      </html>
-    `);
-    fakturWindow.document.close();
-  });
-}
+          </body></html>
+        `);
+        win.document.close();
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPelangganLunas);
   </script>
 </body>
 </html>
