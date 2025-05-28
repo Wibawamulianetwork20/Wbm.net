@@ -66,6 +66,7 @@ function loadPelangganLunas() {
     <td>
       <button onclick="kembalikanPelanggan('${child.key}')">🔙</button>
       <button onclick="lihatFaktur('${child.key}')">🧾</button>
+      <button class="btn-wa" onclick="kirimWA('${id}', '${nama}', '${paket}', '${harga}', '${keterangan}')">📩</button>
     </td>
   </tr>
 `;
@@ -228,6 +229,32 @@ function lihatFaktur(id) {
     fakturWindow.document.close();
   });
 }
+
+  function kirimWA(id, nama, paket, harga, keterangan) {
+  const nomorAdmin = "6285817230536"; // Ganti dengan nomor admin
+  const tanggal = new Date().toLocaleDateString();
+
+  const pesan = `*Bukti Pembayaran e-Billing*\n\n` +
+                `Nama: ${nama}\n` +
+                `Paket: ${paket}\n` +
+                `Harga: Rp ${harga}\n` +
+                `Keterangan: ${keterangan}\n` +
+                `Tanggal: ${tanggal}\n\n` +
+                `Terima kasih telah melakukan pembayaran. 🙏`;
+
+  const linkWa = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
+  window.open(linkWa, '_blank');
+}
+
+  // Contoh panggil fungsi saat halaman faktur sudah diisi
+  // Sesuaikan dengan data faktur dinamis kamu
+  const nama = document.querySelector('#namaFaktur').innerText;
+  const paket = document.querySelector('#paketFaktur').innerText;
+  const harga = document.querySelector('#hargaFaktur').innerText;
+  const keterangan = document.querySelector('#keteranganFaktur').innerText;
+  const tanggal = document.querySelector('#tanggalFaktur').innerText;
+
+  updateWhatsAppLink(id, nama, paket, harga, keterangan, tanggal);
   
   </script>
 </body>
