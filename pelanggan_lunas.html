@@ -106,7 +106,7 @@ function lihatFaktur(id) {
       <head>
       <title>Faktur Pembayaran</title>
       <style>
-        @page { size: A4; margin: 20mm; }
+        @page { size: A4; margin: 0; }
         body {
           font-family: 'Segoe UI', Tahoma, sans-serif;
           background: #f4f4f4;
@@ -114,10 +114,11 @@ function lihatFaktur(id) {
           padding: 0;
         }
         .faktur-container {
-          max-width: 800px;
-          margin: 40px auto;
+          width: 210mm;
+          height: 297mm;
           background: white;
-          padding: 40px;
+          padding: 20mm;
+          box-sizing: border-box
           border-radius: 12px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.1);
           border: 1px solid #ddd;
@@ -218,7 +219,7 @@ function lihatFaktur(id) {
           <div class="faktur-footer">
             <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
             <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
-            <button class="btn-download" onclick="window.print()">🖨️ Cetak Faktur</button>
+            <button onclick="this.style.display='none'; window.print();">🖨️ Cetak Faktur</button>
           </div>
         </div>
       </body>
