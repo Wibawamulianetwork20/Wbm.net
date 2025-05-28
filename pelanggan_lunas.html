@@ -25,10 +25,7 @@
     <tbody></tbody>
   </table>
   </div>
-  <div class="total">
-    Total Harga: <span id="totalHarga">Rp 0</span>
-  </div>
-
+  
   <!-- Firebase & Script -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
@@ -70,8 +67,6 @@
             </tr>`;
         });
         tbody.innerHTML = data;
-        document.getElementById('totalHarga').innerText = 'Rp ' + total.toLocaleString();
-        $('#pelangganlunas').DataTable();
       });
     }
 
@@ -84,6 +79,18 @@
         });
       });
     }
+
+    // Total Pemasukan
+database.ref('pelangganlunas').once('value').then(snapshot => {
+  let totalPemasukan = 0;
+  snapshot.forEach(child => {
+    const data = child.val();
+    if (data.harga) {
+      totalPemasukan += parseInt(data.harga);
+    }
+  });
+  document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
+});
 
     function lihatFaktur(id) {
       db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
