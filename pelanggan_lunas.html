@@ -70,30 +70,6 @@
       });
     }
 
-    // Total pelanggan
-  database.ref('pelanggan').once('value').then(snapshot => {
-    const total = snapshot.size || snapshot.numChildren();
-    document.getElementById("totalPelanggan").innerText = total;
-  });
-
-  // Total pelanggan lunas
-  database.ref('pelangganlunas').once('value').then(snapshot => {
-    const totalLunas = snapshot.size || snapshot.numChildren();
-    document.getElementById("pelangganLunas").innerText = totalLunas;
-  });
-
-  // Total Pemasukan
-  database.ref('pelangganlunas').once('value').then(snapshot => {
-    let totalPemasukan = 0;
-    snapshot.forEach(child => {
-      const data = child.val();
-      if (data.harga) {
-        totalPemasukan += parseInt(data.harga);
-      }
-    });
-    document.getElementById("totalPemasukan").innerText = "Rp " + totalPemasukan.toLocaleString();
-  });
-
     function kembalikanPelanggan(id) {
       db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
         db.ref('pelanggan/' + id).set(snapshot.val(), () => {
