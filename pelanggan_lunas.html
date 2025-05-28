@@ -73,14 +73,26 @@
     }
 
     function kembalikanPelanggan(id) {
-      db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
-        db.ref('pelanggan/' + id).set(snapshot.val(), () => {
-          db.ref('pelangganlunas/' + id).remove();
-          alert('Data dikembalikan ke pelanggan aktif!');
-          location.reload();
+  db.ref("pelangganlunas/" + id).once("value").then(snapshot => {
+    const data = snapshot.val();
+    db.ref("pelanggan/" + id).set(data).then(() => {
+      // Cari dan hapus data pemasukan yang sesuai harga dan metode
+      db.ref("pemasukan").once("value").then(pSnapshot => {
+        pSnapshot.forEach(child => {
+          const pData = child.val();
+          if (pData.harga == data.harga && pData.metode == data.metode) {
+            db.ref("pemasukan/" + child.key).remove();
+          }
         });
       });
-    }
+
+      // Hapus dari pelangganlunas
+      db.ref("pelangganlunas/" + id).remove();
+      alert("Data dikembalikan ke pelanggan aktif dan total harga diperbarui.");
+      location.reload();
+    });
+  });
+}
 
     function lihatFaktur(id) {
       db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
