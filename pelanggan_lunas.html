@@ -66,7 +66,6 @@ function loadPelangganLunas() {
     <td>
       <button onclick="kembalikanPelanggan('${child.key}')">🔙</button>
       <button onclick="lihatFaktur('${child.key}')">🧾</button>
-      <button class="btn-wa" onclick="kirimWA('${id}', '${nama}', '${paket}', '${harga}', '${keterangan}')">📩</button>
     </td>
   </tr>
 `;
@@ -229,23 +228,6 @@ function lihatFaktur(id) {
     fakturWindow.document.close();
   });
 }
-
-  function kirimWA(id, nama, paket, harga, keterangan) {
-  const nomorAdmin = "6285817230536"; // Ganti dengan nomor admin
-  const tanggal = new Date().toLocaleDateString();
-
-  const pesan = `*Bukti Pembayaran e-Billing*\n\n` +
-                `Nama: ${nama}\n` +
-                `Paket: ${paket}\n` +
-                `Harga: Rp ${harga}\n` +
-                `Keterangan: ${keterangan}\n` +
-                `Tanggal: ${tanggal}\n\n` +
-                `Terima kasih telah melakukan pembayaran. 🙏`;
-
-  const linkWa = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
-  window.open(linkWa, '_blank');
-}
-  
   </script>
 </body>
 </html>
