@@ -63,17 +63,17 @@
         const id = child.key;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${no++}</td>
-          <td>${data.nama}</td>
-          <td>${data.paket}</td>
-          <td>${data.keterangan}</td>
-          <td>${data.harga}</td>
-          <td>
-            <button class="btn-bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
-            <button class="btn-edit" onclick="editPelanggan('${id}')">Edit</button>
-            <button class="btn-hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
-          </td>
-        `;
+  <td>${no++}</td>
+  <td>${data.nama}</td>
+  <td>${data.paket}</td>
+  <td>${data.keterangan}</td>
+  <td>${data.harga}</td>
+  <td>
+    <button class="btn-bayar" onclick="bayarPelanggan('${id}')">💸 Bayar</button>
+    <button class="btn-edit" onclick="editPelanggan('${id}')">📝 Edit</button>
+    <button class="btn-hapus" onclick="hapusPelanggan('${id}')">🗑️ Hapus</button>
+  </td>
+`;
         tbody.appendChild(tr);
       });
     });
@@ -120,7 +120,7 @@
           <p><strong>Harga:</strong> Rp ${data.harga}</p>
           <p class="lunas">LUNAS</p>
           <p style="text-align: center;">Terima kasih sudah membayar tepat waktu.</p>
-          <button onclick="window.print()">Download Faktur</button>
+          <button onclick="window.print()">🖨️ Cetak Faktur</button>
         </body>
         </html>
       `);
