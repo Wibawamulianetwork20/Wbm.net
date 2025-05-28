@@ -146,33 +146,59 @@
     }
 
     function bayarPelanggan(id) {
-  // Ambil data dari node 'pelanggan' berdasarkan ID
-  db.ref('pelanggan/' + id).once('value')
-    .then(snapshot => {
-      const data = snapshot.val();
-      if (!data) {
-        alert("Data pelanggan tidak ditemukan!");
-        return;
-      }
+      db.ref('pelanggan/' + id).once('value')
+        .then(snapshot => {
+          const data = snapshot.val();
+          if (!data) {
+            alert("Data pelanggan tidak ditemukan!");
+            return;
+          }
 
-      // Salin data ke node 'pelangganlunas'
-      db.ref('pelangganlunas/' + id).set(data)
-        .then(() => {
-          // Hapus data dari 'pelanggan'
-          return db.ref('pelanggan/' + id).remove();
-        })
-        .then(() => {
-          alert("Data berhasil dipindahkan ke pelangganlunas!");
-          location.reload();
+          db.ref('pelangganlunas/' + id).set(data)
+            .then(() => db.ref('pelanggan/' + id).remove())
+            .then(() => {
+              buatFaktur(data.nama, data.paket, data.keterangan, data.harga);
+              alert("Data berhasil dipindahkan ke pelangganlunas!");
+              location.reload();
+            })
+            .catch(err => {
+              alert("Terjadi kesalahan: " + err.message);
+            });
         })
         .catch(err => {
-          alert("Terjadi kesalahan: " + err.message);
+          alert("Gagal mengambil data: " + err.message);
         });
-    })
-    .catch(err => {
-      alert("Gagal mengambil data: " + err.message);
-    });
-}
+    }
+
+    function buatFaktur(nama, paket, keterangan, harga) {
+      const fakturWindow = window.open('', 'Faktur', 'width=400,height=600');
+      fakturWindow.document.write(`
+        <html>
+        <head>
+          <title>Faktur Pembayaran</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            td, th { border: 1px solid #ddd; padding: 8px; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h2>Faktur Pembayaran</h2>
+          <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
+          <table>
+            <tr><th>Nama</th><td>${nama}</td></tr>
+            <tr><th>Paket</th><td>${paket}</td></tr>
+            <tr><th>Keterangan</th><td>${keterangan}</td></tr>
+            <tr><th>Harga</th><td>Rp ${harga}</td></tr>
+          </table>
+          <p style="text-align: center; margin-top: 40px;">Terima kasih atas pembayaran Anda!</p>
+        </body>
+        </html>
+      `);
+      fakturWindow.document.close();
+    }
 
     function editPelanggan(id) {
       const newNama = prompt("Masukkan nama baru:");
