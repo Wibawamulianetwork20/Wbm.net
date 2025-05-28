@@ -1,4 +1,4 @@
-/* Background Animasi */
+/* Background Animasi Gradient */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -18,9 +18,10 @@ body {
 /* Judul */
 h2 {
   text-align: center;
-  color: #004d40;
+  color: #ffffff;
   font-size: 2rem;
   margin-bottom: 20px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
 }
 
 /* Tabel */
@@ -28,16 +29,19 @@ h2 {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  background: white;
+  background: rgba(255,255,255,0.95);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 #pelangganlunas th {
   background: linear-gradient(90deg, #26a69a, #009688);
   color: white;
   padding: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
 }
 
 #pelangganlunas td {
@@ -51,19 +55,21 @@ h2 {
 }
 
 #pelangganlunas tbody tr:hover {
-  background: #d0f0e0;
+  background: rgba(38,166,154,0.15);
   cursor: pointer;
+  transition: 0.3s;
 }
 
-/* Tombol Kembalikan */
+/* Tombol Aksi */
 #pelangganlunas button {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
   font-size: 0.85rem;
   cursor: pointer;
-  background: #ff6f61;
+  margin: 2px;
   color: white;
+  font-weight: bold;
   transition: all 0.3s ease;
 }
 
@@ -72,13 +78,22 @@ h2 {
   opacity: 0.9;
 }
 
+button[onclick*="kembalikan"] {
+  background: #f39c12;
+}
+
+button[onclick*="lihatFaktur"] {
+  background: #27ae60;
+}
+
 /* Total Harga */
 .total {
   text-align: right;
   margin-top: 15px;
   font-size: 1.1rem;
   font-weight: bold;
-  color: #00695c;
+  color: #f1f1f1;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
 }
 
 /* Responsive */
@@ -89,10 +104,11 @@ h2 {
 
   #pelangganlunas th, #pelangganlunas td {
     font-size: 0.85rem;
+    padding: 8px;
   }
 
   #pelangganlunas button {
-    font-size: 0.8rem;
-    padding: 5px 10px;
+    font-size: 0.75rem;
+    padding: 5px 8px;
   }
 }
