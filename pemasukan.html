@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>e-Billing System - Dashboard</title>
+<link rel="stylesheet" href="pemasukan.css" type="text/css" media="all" />
+</head>
+<body>
+
+  <h1>Dashboard e-Billing System</h1>
+
+  <table id="dashboardTable">
+    <thead>
+      <tr>
+        <th>Kategori</th>
+        <th>Jumlah (Rp)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Total Pemasukan</td>
+        <td id="totalPemasukan">Rp 0</td>
+      </tr>
+      <tr>
+        <td>Pemasukan Langganan Cash</td>
+        <td id="langgananCash">Rp 0</td>
+      </tr>
+      <tr>
+        <td>Pemasukan Langganan Transfer</td>
+        <td id="langgananTransfer">Rp 0</td>
+      </tr>
+      <tr>
+        <td>pengeluaran</td>
+        <td id="pengeluaran">Rp 0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.appspot.com",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function formatRupiah(number) {
+      return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function loadDashboardData() {
+      let total = 0;
+      let langgananCash = 0;
+      let langgananTransfer = 0;
+      let pengeluaran = 0;
+
+      db.ref('pelangganlunas').once('value', snapshot => {
+        snapshot.forEach(child => {
+          const data = child.val();
+          const harga = parseInt(data.harga) || 0;
+          const metode = (data.metode || "").toLowerCase();
+          const keterangan = (data.keterangan || "").toLowerCase();
+
+          total += harga;
+
+          if (keterangan.includes('langganan') || keterangan.includes('device')) {
+            if (metode.includes('cash')) {
+              langgananCash += harga;
+            } else {
+              langgananTransfer += harga;
+            }
+          } else {
+            if (metode.includes('cash')) {
+              nonLanggananCash += harga;
+            } else {
+              nonLanggananTransfer += harga;
+            }
+          }
+        });
+
+        document.getElementById('totalPemasukan').textContent = formatRupiah(total);
+        document.getElementById('langgananCash').textContent = formatRupiah(langgananCash);
+        document.getElementById('langgananTransfer').textContent = formatRupiah(langgananTransfer);
+        document.getElementById('pengeluaran').textContent = formatRupiah(pengeluaran);
+      });
+    }
+
+    loadDashboardData();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catatan Pengeluaran</title>
+  <link rel="stylesheet" href="pengeluaran.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Catatan Pengeluaran</h1>
+
+    <form id="formPengeluaran" class="form-pengeluaran">
+      <label for="kategori">Kategori</label>
+      <input type="text" id="kategori" placeholder="Masukkan kategori pengeluaran" required />
+
+      <label for="harga">Harga</label>
+      <input type="number" id="harga" placeholder="Masukkan harga pengeluaran" required />
+
+      <button type="submit">Tambah Pengeluaran</button>
+    </form>
+
+    <h2>Daftar Pengeluaran</h2>
+    <table id="tabelPengeluaran">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kategori</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.appspot.com",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Elemen
+    const formPengeluaran = document.getElementById("formPengeluaran");
+    const kategoriInput = document.getElementById("kategori");
+    const hargaInput = document.getElementById("harga");
+    const tabelPengeluaran = document.getElementById("tabelPengeluaran").getElementsByTagName("tbody")[0];
+
+    // Tambah Pengeluaran
+    formPengeluaran.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const kategori = kategoriInput.value.trim();
+      const harga = parseInt(hargaInput.value.trim());
+
+      if (kategori && harga) {
+        const newData = db.ref("pengeluaran").push();
+        newData.set({
+          kategori: kategori,
+          harga: harga
+        });
+
+        alert("Pengeluaran berhasil ditambahkan!");
+        kategoriInput.value = "";
+        hargaInput.value = "";
+      }
+    });
+
+    // Tampilkan Data Pengeluaran
+    function tampilkanData() {
+      db.ref("pengeluaran").on("value", snapshot => {
+        tabelPengeluaran.innerHTML = "";
+        let no = 1;
+
+        snapshot.forEach(child => {
+          const data = child.val();
+          const id = child.key;
+          const row = tabelPengeluaran.insertRow();
+
+          row.innerHTML = `
+            <td>${no++}</td>
+            <td>${data.kategori}</td>
+            <td>Rp ${parseInt(data.harga).toLocaleString()}</td>
+            <td><button onclick="hapusPengeluaran('${id}')">Hapus</button></td>
+          `;
+        });
+      });
+    }
+
+    tampilkanData();
+
+    // Hapus Data Pengeluaran
+    function hapusPengeluaran(id) {
+      if (confirm("Hapus data ini?")) {
+        db.ref("pengeluaran/" + id).remove();
+      }
+    }
+  </script>
+</body>
+</html>
