@@ -106,21 +106,27 @@ function konfirmasiBayar() {
   db.ref('pelanggan/' + idPelangganDipilih).once('value').then(snapshot => {
     const data = snapshot.val();
     data.metode = metode;
+    data.tanggal = new Date().toLocaleString('id-ID');
+    data.idFaktur = 'FTR-' + Date.now();
 
-    // Tambahkan ke pelangganlunas
+    // Simpan ke pelangganlunas
     db.ref('pelangganlunas/' + idPelangganDipilih).set(data).then(() => {
-      // Tambahkan juga ke pemasukan
+      // Simpan ke pemasukan
       db.ref('pemasukan').push({
         kategori: 'langganan',
         harga: data.harga,
         metode: metode
-      }).then(() => {
-        // Hapus dari pelanggan
-        db.ref('pelanggan/' + idPelangganDipilih).remove();
-        alert("Data dipindahkan ke pelanggan lunas dan tercatat di pemasukan dengan metode: " + metode);
-        tutupModal();
-        location.reload();
       });
+
+      // Simpan ke faktur
+      db.ref('faktur/' + idPelangganDipilih).set(data);
+
+      // Hapus dari pelanggan
+      db.ref('pelanggan/' + idPelangganDipilih).remove();
+
+      alert("Data dipindahkan ke pelanggan lunas, tercatat di pemasukan, dan faktur dibuat!");
+      tutupModal();
+      location.reload();
     });
   });
 }
