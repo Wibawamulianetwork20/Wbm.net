@@ -11,6 +11,9 @@ body {
   color: #fff;
   min-height: 100vh;
   padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container {
@@ -50,6 +53,7 @@ table {
 
 thead {
   background: linear-gradient(45deg, #3498db, #2ecc71);
+  color: #fff;
   font-weight: bold;
   font-size: 15px;
 }
@@ -58,9 +62,7 @@ th, td {
   padding: 14px 13px;
   text-align: center;
   font-weight: bold;
-  background: linear-gradient(90deg, #f2de4f, #42f7f3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -85,9 +87,8 @@ button {
   transition: all 0.2s ease-in-out;
   font-weight: 600;
   letter-spacing: 0.5px;
-  background: linear-gradient(90deg, #f2de4f, #42f7f3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
@@ -195,6 +196,11 @@ button[onclick^="lihatFaktur"] {
 
 .modal-actions button:last-child {
   background: linear-gradient(45deg, #ff416c, #ff4b2b);
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Responsif */
