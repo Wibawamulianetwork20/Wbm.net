@@ -47,7 +47,6 @@
     const db = firebase.database();
 
     function loadPelangganLunas() {
-      const tbody = document.querySelector('#pelangganlunas tbody');
       document.addEventListener('DOMContentLoaded', () => {
   db.ref('pelangganlunas').on('value', snapshot => {
     const tbody = document.querySelector('#pelangganlunas tbody');
