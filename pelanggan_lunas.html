@@ -48,7 +48,7 @@
 
     function loadPelangganLunas() {
       document.addEventListener('DOMContentLoaded', () => {
-  db.ref('pelangganlunas').on('value', snapshot => {
+  db.ref('pelanggan').on('value', snapshot => {
     const tbody = document.querySelector('#pelangganlunas tbody');
     let data = '', no = 1, total = 0;
     snapshot.forEach(child => {
