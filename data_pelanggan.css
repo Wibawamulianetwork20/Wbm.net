@@ -58,6 +58,20 @@ h2 {
   opacity: 0.9;
 }
 
+button.tambah-pelanggan {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button.tambah-pelanggan:hover {
+  background-color: #27ae60;
+}
+
 /* Tabel Pelanggan */
 .table-container {
   max-width: 1000px; /* Batas lebar tabel */
@@ -198,7 +212,6 @@ table {
 .aksi-btn.bayar { background: #4caf50; }
 .aksi-btn.edit { background: #f39c12; }
 .aksi-btn.hapus { background: #e74c3c; }
-.aksi-btn.tambah { background-color: #3498db; }
 
 .aksi-btn:hover {
   transform: scale(1.1);
