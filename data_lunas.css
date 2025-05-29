@@ -23,6 +23,29 @@ body {
   backdrop-filter: blur(8px);
 }
 
+/* Input File JSON */
+.input-json {
+  display: inline-block;
+  padding: 10px 16px;
+  background: linear-gradient(45deg, #7f00ff, #e100ff);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.input-json:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.input-json input[type="file"] {
+  display: none;
+}
+
 h2 {
   text-align: center;
   margin-bottom: 25px;
