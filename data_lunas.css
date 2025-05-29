@@ -45,11 +45,11 @@ table {
   border-collapse: collapse;
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(42,179,234,0.05);
 }
 
 thead {
-  background: #2ecc71;
+  background-color: #2ecc71;
   color: #fff;
   font-weight: bold;
   font-size: 15px;
@@ -75,17 +75,17 @@ tbody tr:hover {
 
 /* Tombol */
 button {
-  padding: 8px 14px;
-  margin: 4px;
+  padding: 5px 10px;
+  margin: 2px ;
   border: none;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  font-weight: 600;
+  font-weight: bold;
   letter-spacing: 0.5px;
   color: #fff;
-  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  background-color: #00f2fe;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
