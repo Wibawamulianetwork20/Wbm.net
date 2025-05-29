@@ -48,27 +48,29 @@
 
     function loadPelangganLunas() {
       const tbody = document.querySelector('#pelangganlunas tbody');
-      db.ref('pelangganlunas').once('value').then(snapshot => {
-        let data = '', no = 1, total = 0;
-        snapshot.forEach(child => {
-          const p = child.val();
-          total += parseInt(p.harga);
-          data += `
-            <tr>
-              <td>${no++}</td>
-              <td>${p.nama}</td>
-              <td>${p.paket}</td>
-              <td>${p.keterangan}</td>
-              <td>Rp ${p.harga}</td>
-              <td>
-                <button onclick="kembalikanPelanggan('${child.key}')">Kembali</button>
-                <button onclick="lihatFaktur('${child.key}')">Faktur</button>
-              </td>
-            </tr>`;
-        });
-        tbody.innerHTML = data;
-      });
-    }
+      document.addEventListener('DOMContentLoaded', () => {
+  db.ref('pelangganlunas').on('value', snapshot => {
+    const tbody = document.querySelector('#pelangganlunas tbody');
+    let data = '', no = 1, total = 0;
+    snapshot.forEach(child => {
+      const p = child.val();
+      total += parseInt(p.harga);
+      data += `
+        <tr>
+          <td>${no++}</td>
+          <td>${p.nama}</td>
+          <td>${p.paket}</td>
+          <td>${p.keterangan}</td>
+          <td>Rp ${p.harga}</td>
+          <td>
+            <button onclick="kembalikanPelanggan('${child.key}')">Kembali</button>
+            <button onclick="lihatFaktur('${child.key}')">Faktur</button>
+          </td>
+        </tr>`;
+    });
+    tbody.innerHTML = data;
+  });
+});
 
     // Total pelanggan
   database.ref('pelanggan').once('value').then(snapshot => {
