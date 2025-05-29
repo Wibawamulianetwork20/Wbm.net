@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Data Pelanggan Lunas</title>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="data_lunas.css">
   <style>
     body {
@@ -76,8 +77,8 @@
               <td>${p.keterangan}</td>
               <td>Rp ${parseInt(p.harga).toLocaleString('id-ID')}</td>
               <td>
-                <button onclick="kembalikanPelanggan('${child.key}')">Kembalikan</button>
-                <button onclick="lihatFaktur('${child.key}')">Faktur</button>
+                <button onclick="kembalikanPelanggan('${child.key}')"><i class="fas fa-undo"></i>Kembalikan</button>
+                <button onclick="lihatFaktur('${child.key}')"><i class="fas fa-file-invoice"></i>Faktur</button>
               </td>
             </tr>`;
         });
