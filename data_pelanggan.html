@@ -82,16 +82,10 @@
                 <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
                 <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
                 <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
+                <button class="aksi-btn tambah" onclick="bukaModalTambah()">+ Tambah Pelanggan</button>
               </td>
             </tr>`;
         });
-    tbody.innerHTML += `
-      <tr>
-        <td colspan="6" style="text-align:center;">
-          <button class="aksi-btn tambah" onclick="bukaModalTambah()">+ Tambah Pelanggan Baru</button>
-        </td>
-      </tr>`;
-        
         if (!$.fn.DataTable.isDataTable('#tabelPelanggan')) {
         $('#tabelPelanggan').DataTable();
         }
