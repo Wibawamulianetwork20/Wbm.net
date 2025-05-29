@@ -37,7 +37,12 @@ h2 {
 #tabelPelangganLunas {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  margin-top: 30px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
 }
 
 #tabelPelangganLunas thead {
@@ -45,11 +50,18 @@ h2 {
   color: #ffffff;
 }
 
-#tabelPelangganLunas th,
+#tabelPelangganLunas th {
+  background: linear-gradient(90deg, #26a69a, #009688);
+  color: white;
+  padding: 16px;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
 #tabelPelangganLunas td {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
   text-align: center;
+  padding: 14px;
+  font-size: 0.95rem;
 }
 
 #tabelPelangganLunas tr:nth-child(even) {
