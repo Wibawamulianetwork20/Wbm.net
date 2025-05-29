@@ -79,6 +79,8 @@ button.aksi-btn.hapus:hover {
 #tabelPelanggan {
   width: 100%;
   border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 #tabelPelanggan thead {
