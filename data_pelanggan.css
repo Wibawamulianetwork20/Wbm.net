@@ -76,6 +76,7 @@ button:active, .btn:active {
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   backdrop-filter: blur(4px);
   margin-top: 20px;
+  overflow-x: auto;
 }
 
 #tabelPelanggan {
