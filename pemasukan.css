@@ -11,7 +11,7 @@ body {
   background: linear-gradient(135deg, #e0f7fa, #ffffff);
   color: var(--text-color);
   margin: 0;
-  padding: 20px;
+  padding: 10px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
