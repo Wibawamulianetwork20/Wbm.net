@@ -60,9 +60,6 @@ thead {
 th, td {
   padding: 14px 13px;
   text-align: center;
-  background: linear-gradient(90deg, #f2de4f, #42f7f3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
