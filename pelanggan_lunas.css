@@ -5,127 +5,105 @@
   100% { background-position: 0% 50%; }
 }
 
+/* General Styles */
 body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
-  background-size: 600% 600%;
-  animation: gradientMove 15s ease infinite;
   margin: 0;
-  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
   color: #333;
+  padding: 20px;
 }
 
-/* Judul */
 h2 {
   text-align: center;
-  color: #ffffff;
-  font-size: 2rem;
+  color: #2c3e50;
   margin-bottom: 20px;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
 }
 
-/* Tabel */
+/* Table Container */
 .table-container {
-  max-width: 1000px; /* Batas lebar tabel */
-  margin: 0 auto; /* Tengah horizontal */
-  padding: 0 20px; /* Padding kiri-kanan */
-  overflow-x: auto; /* Biar scroll kalau kecil */
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow-x: auto;
 }
 
-table {
+/* DataTable Styles */
+#tabelPelangganLunas {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-  margin: 0;
 }
 
-#pelangganlunas {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-
-#pelangganlunas th {
-  background: linear-gradient(90deg, #26a69a, #009688);
+#tabelPelangganLunas thead {
+  background-color: #3498db;
   color: white;
-  padding: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 600;
 }
 
-#pelangganlunas td {
+#tabelPelangganLunas th, #tabelPelangganLunas td {
+  padding: 10px 12px;
   text-align: center;
-  padding: 12px;
-  font-size: 0.95rem;
+  border: 1px solid #ddd;
 }
 
-#pelangganlunas tbody tr:nth-child(even) {
-  background: #f9f9f9;
+#tabelPelangganLunas tr:nth-child(even) {
+  background-color: #f9f9f9;
 }
 
-#pelangganlunas tbody tr:hover {
-  background: rgba(38,166,154,0.15);
-  cursor: pointer;
-  transition: 0.3s;
+#tabelPelangganLunas tr:hover {
+  background-color: #eaf2f8;
 }
 
-/* Tombol Aksi */
-#pelangganlunas button {
+/* Button Styles */
+button {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 14px;
   cursor: pointer;
   margin: 2px;
-  color: white;
-  font-weight: bold;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 
-#pelangganlunas button:hover {
-  transform: scale(1.1);
+button:hover {
   opacity: 0.9;
 }
 
-button[onclick*="kembalikan"] {
-  background: #f39c12;
+button:active {
+  transform: scale(0.98);
 }
 
-button[onclick*="lihatFaktur"] {
-  background: #27ae60;
+button[onclick^="kembalikanPelanggan"] {
+  background-color: #e67e22;
+  color: white;
 }
 
-/* Total Harga */
-.total {
-  text-align: right;
-  margin-top: 15px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #f1f1f1;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+button[onclick^="lihatFaktur"] {
+  background-color: #27ae60;
+  color: white;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  h2 {
-    font-size: 1.6rem;
+  body {
+    padding: 10px;
   }
 
-  #pelangganlunas th, #pelangganlunas td {
-    font-size: 0.85rem;
+  h2 {
+    font-size: 20px;
+  }
+
+  .table-container {
+    padding: 10px;
+  }
+
+  #tabelPelangganLunas th, #tabelPelangganLunas td {
+    font-size: 12px;
     padding: 8px;
   }
 
-  #pelangganlunas button {
-    font-size: 0.75rem;
-    padding: 5px 8px;
+  button {
+    font-size: 12px;
+    padding: 4px 8px;
   }
 }
