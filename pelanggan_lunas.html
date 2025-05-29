@@ -95,53 +95,56 @@
 }
 
     function lihatFaktur(id) {
-      db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
-        const d = snapshot.val();
-        const win = window.open('', '', 'width=800,height=1000');
-        win.document.write(`
-          <html><head><title>Faktur</title>
-          <style>
-            body { font-family: Arial; padding: 20px; }
-            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3498db; }
-            .header img { width: 70px; }
-            .header h1 { font-size: 24px; margin: 0; }
-            h2 { text-align: center; margin: 20px 0; }
-            p { margin: 4px 0; }
-            .lunas { text-align: center; color: green; font-weight: bold; margin: 20px 0; }
-            .paraf { margin-top: 40px; text-align: right; }
-            .footer { text-align: center; margin-top: 50px; font-size: 13px; color: #777; }
-            .footer button { margin-top: 20px; background: #3498db; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
-          </style>
-          </head><body>
-          <div class="header">
-            <div>
-              <h1>e-Billing System</h1>
-              <p>WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
-              <p>Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
-            </div>
-            <img src="wbm1.jpg" alt="Logo">
+  db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
+    const d = snapshot.val();
+    const win = window.open('', '', 'width=800,height=1000');
+    win.document.write(`
+      <html>
+      <head>
+        <title>Faktur Pembayaran</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 30px; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+          .header img { width: 70px; }
+          .header h1 { font-size: 24px; margin: 0; }
+          h2 { text-align: center; margin: 20px 0; font-size: 22px; }
+          p { margin: 4px 0; font-size: 16px; }
+          .lunas { text-align: center; color: green; font-weight: bold; font-size: 20px; margin: 20px 0; }
+          .paraf { margin-top: 40px; text-align: right; }
+          .footer { text-align: center; margin-top: 50px; font-size: 13px; color: #777; }
+          .footer button { margin-top: 20px; background: #3498db; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1>e-Billing System</h1>
+            <p>WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
+            <p>Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
           </div>
-          <h2>Bukti Pembayaran</h2>
-          <p><strong>ID Pelanggan:</strong> ${id}</p>
-          <p><strong>Nama:</strong> ${d.nama}</p>
-          <p><strong>Paket:</strong> ${d.paket}</p>
-          <p><strong>Keterangan:</strong> ${d.keterangan}</p>
-          <p><strong>Harga:</strong> Rp ${d.harga}</p>
-          <p><strong>Metode Pembayaran:</strong> ${data.metode}</p>
-          <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
-          <div class="lunas">LUNAS</div>
-          <div class="paraf">Paraf: ______________________</div>
-          <p style="text-align:right; font-weight:bold;">Admin e-Billing</p>
-          <div class="footer">
-            <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
-            <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
-            <button onclick="this.style.display='none'; window.print();">Cetak Faktur</button>
-          </div>
-          </body></html>
-        `);
-        win.document.close();
-      });
-    }
+          <img src="wbm1.jpg" alt="Logo">
+        </div>
+        <h2>Bukti Pembayaran</h2>
+        <p><strong>ID Pelanggan:</strong> ${id}</p>
+        <p><strong>Nama:</strong> ${d.nama}</p>
+        <p><strong>Paket:</strong> ${d.paket}</p>
+        <p><strong>Keterangan:</strong> ${d.keterangan}</p>
+        <p><strong>Harga:</strong> Rp ${parseInt(d.harga).toLocaleString()}</p>
+        <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
+        <div class="lunas">LUNAS</div>
+        <div class="paraf">Paraf: ______________________</div>
+        <p style="text-align:right; font-weight:bold;">Admin e-Billing</p>
+        <div class="footer">
+          <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
+          <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
+          <button onclick="this.style.display='none'; window.print();">Cetak Faktur</button>
+        </div>
+      </body>
+      </html>
+    `);
+    win.document.close();
+  });
+}
 
     document.addEventListener('DOMContentLoaded', loadPelangganLunas);
   </script>
