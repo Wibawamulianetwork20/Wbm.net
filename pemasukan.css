@@ -22,7 +22,6 @@ h2 {
   color: var(--secondary-color);
   margin-bottom: 20px;
   text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
 table {
