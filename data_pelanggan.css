@@ -81,6 +81,8 @@ button:active, .btn:active {
 #tabelPelanggan {
   width: 100%;
   border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
   color:black;
   font-weight: bold;
 }
