@@ -6,63 +6,69 @@
 }
 
 /* General Styles */
+/* Reset dan dasar */
 body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
+  background-size: 600% 600%;
+  animation: gradientMove 15s ease infinite;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
   padding: 20px;
+  color: #333;
 }
 
+/* Judul halaman */
 h2 {
   text-align: center;
   color: #2c3e50;
   margin-bottom: 20px;
 }
 
-/* Table Container */
+/* Container tabel */
 .table-container {
-  background: #fff;
+  background: #ffffff;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   overflow-x: auto;
 }
 
-/* DataTable Styles */
+/* Tabel */
 #tabelPelangganLunas {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
 
 #tabelPelangganLunas thead {
   background-color: #3498db;
-  color: white;
+  color: #ffffff;
 }
 
-#tabelPelangganLunas th, #tabelPelangganLunas td {
-  padding: 10px 12px;
-  text-align: center;
+#tabelPelangganLunas th,
+#tabelPelangganLunas td {
+  padding: 12px 15px;
   border: 1px solid #ddd;
+  text-align: center;
 }
 
 #tabelPelangganLunas tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: #f2f2f2;
 }
 
 #tabelPelangganLunas tr:hover {
   background-color: #eaf2f8;
 }
 
-/* Button Styles */
+/* Tombol */
 button {
   padding: 6px 12px;
+  margin: 2px;
   border: none;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  margin: 2px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -75,15 +81,15 @@ button:active {
 
 button[onclick^="kembalikanPelanggan"] {
   background-color: #e67e22;
-  color: white;
+  color: #ffffff;
 }
 
 button[onclick^="lihatFaktur"] {
   background-color: #27ae60;
-  color: white;
+  color: #ffffff;
 }
 
-/* Responsive */
+/* Responsif */
 @media (max-width: 768px) {
   body {
     padding: 10px;
@@ -97,7 +103,8 @@ button[onclick^="lihatFaktur"] {
     padding: 10px;
   }
 
-  #tabelPelangganLunas th, #tabelPelangganLunas td {
+  #tabelPelangganLunas th,
+  #tabelPelangganLunas td {
     font-size: 12px;
     padding: 8px;
   }
