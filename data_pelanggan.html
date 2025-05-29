@@ -120,12 +120,43 @@
         </td>
 
       </tr>`;
-        
-        if (!$.fn.DataTable.isDataTable('#tabelPelanggan')) {
         $('#tabelPelanggan').DataTable();
-        }
       });
     }
+
+    // Modal Tambah Pelanggan
+function bukaModalTambah() {
+  document.getElementById("modalTambah").style.display = "block";
+}
+
+function tutupModalTambah() {
+  document.getElementById("modalTambah").style.display = "none";
+}
+
+function simpanPelangganBaru() {
+  const nama = document.getElementById("namaBaru").value.trim();
+  const paket = document.getElementById("paketBaru").value.trim();
+  const keterangan = document.getElementById("keteranganBaru").value.trim();
+  const harga = document.getElementById("hargaBaru").value.trim();
+
+  if (!nama || !paket || !keterangan || !harga) {
+    alert("Semua field harus diisi!");
+    return;
+  }
+
+  db.ref('pelanggan').push({
+    nama,
+    paket,
+    keterangan,
+    harga
+  }).then(() => {
+    alert("Pelanggan baru berhasil ditambahkan!");
+    tutupModalTambah();
+    location.reload();
+  }).catch(err => {
+    alert("Gagal menambahkan pelanggan: " + err.message);
+  });
+}
 
 function bayarPelanggan(id) {
   idPelangganDipilih = id;
