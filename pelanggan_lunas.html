@@ -94,134 +94,116 @@
   });
 }
 
-    function lihatFaktur(id) {
+function lihatFaktur(id) {
   db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
     const d = snapshot.val();
-    const win = window.open('', '', 'width=800,height=1000');
+    const win = window.open('', '', 'width=900,height=1200');
     win.document.write(`
-      <html>
-      <head>
-        <title>Faktur Pembayaran</title>
-        <style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    color: #333;
-    background: #fff;
-    padding: 30px;
-    line-height: 1.5;
-  }
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #3498db;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-  }
-
-  .header img {
-    width: 80px;
-    height: auto;
-  }
-
-  .header .info {
-    text-align: right;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 24px;
-    color: #3498db;
-  }
-
-  h2 {
-    text-align: center;
-    margin: 20px 0;
-    color: #2c3e50;
-  }
-
-  p {
-    margin: 4px 0;
-    font-size: 16px;
-  }
-
-  .lunas {
-    text-align: center;
-    color: green;
-    font-weight: bold;
-    font-size: 20px;
-    margin: 20px 0;
-  }
-
-  .paraf {
-    margin-top: 50px;
-    text-align: right;
-  }
-
-  .paraf p {
-    font-size: 14px;
-  }
-
-  .footer {
-    text-align: center;
-    font-size: 12px;
-    color: #888;
-    margin-top: 30px;
-  }
-
-  .footer button {
-    margin-top: 20px;
-    padding: 8px 16px;
-    background: #3498db;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-
-  .footer button:hover {
-    background: #2980b9;
-  }
-
-  .info p {
-    margin: 0;
-    font-size: 14px;
-  }
-
-  .logo {
-    width: 70px;
-  }
-</style>
-      </head>
-      <body>
+      <html><head><title>Faktur Pembayaran</title>
+      <style>
+        @page { size: A4; margin: 20mm; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+        .header img { width: 100px; }
+        .header h1 { font-size: 24px; margin: 0; }
+        .header p { margin: 2px 0; }
+        h2 { text-align: center; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        .lunas { color: green; text-align: center; font-weight: bold; margin-top: 20px; font-size: 18px; }
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #777; }
+        .footer button { margin-top: 10px; background: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .paraf { text-align: right; margin-top: 40px; }
+        .paraf p { margin: 0; }
+      </style>
+      </head><body>
         <div class="header">
           <div>
             <h1>e-Billing System</h1>
             <p>WBM.NET | PT. INDO TELEMEDIA SOLUSION</p>
             <p>Email: wbmnet2020@gmail.com | Telp: 083146260133</p>
           </div>
-          <img src="wbm1.jpg" alt="Logo">
+          <div>
+            <img src="wbm1.jpg" alt="WBM Logo">
+            <img src="indotel.jpg" alt="Indotel Logo" style="margin-left:10px;">
+          </div>
         </div>
-        <h2>Bukti Pembayaran</h2>
+
+        <h2>BUKTI PEMBAYARAN</h2>
         <p><strong>ID Pelanggan:</strong> ${id}</p>
         <p><strong>Nama:</strong> ${d.nama}</p>
+        <p><strong>Alamat:</strong> ${d.alamat || '-'}</p>
+        <p><strong>No HP:</strong> ${d.telepon || '-'}</p>
         <p><strong>Paket:</strong> ${d.paket}</p>
         <p><strong>Keterangan:</strong> ${d.keterangan}</p>
         <p><strong>Harga:</strong> Rp ${parseInt(d.harga).toLocaleString()}</p>
+        <p><strong>Metode Pembayaran:</strong> ${d.metode || '-'}</p>
         <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
+
         <div class="lunas">LUNAS</div>
-        <div class="paraf">Paraf: ______________________</div>
-        <p style="text-align:right; font-weight:bold;">Admin e-Billing</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Item</th>
+              <th>Harga</th>
+              <th>Qty</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>${d.paket}</td>
+              <td>Rp ${parseInt(d.harga).toLocaleString()}</td>
+              <td>1</td>
+              <td>Rp ${parseInt(d.harga).toLocaleString()}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Terbilang:</strong> ${terbilang(parseInt(d.harga))} Rupiah</p>
+
+        <div class="paraf">
+          <p>Paraf: __________________________</p>
+          <p><strong>Admin e-Billing</strong></p>
+        </div>
+
         <div class="footer">
           <p>Terima kasih telah melakukan pembayaran tepat waktu.</p>
           <p>Faktur ini dicetak otomatis oleh sistem e-Billing.</p>
           <button onclick="this.style.display='none'; window.print();">Cetak Faktur</button>
         </div>
-      </body>
-      </html>
+
+        <script>
+          function terbilang(angka) {
+            const satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan"];
+            const belasan = ["Sepuluh", "Sebelas", "Dua Belas", "Tiga Belas", "Empat Belas", "Lima Belas", "Enam Belas", "Tujuh Belas", "Delapan Belas", "Sembilan Belas"];
+            const ribuan = ["", "Ribu", "Juta", "Miliar"];
+            let str = "";
+            let i = 0;
+            while (angka > 0) {
+              let sisa = angka % 1000;
+              let ratusan = Math.floor(sisa / 100);
+              let puluhan = sisa % 100;
+              let kata = "";
+              if (ratusan > 0) kata += (ratusan == 1 ? "Seratus " : satuan[ratusan] + " Ratus ");
+              if (puluhan > 0) {
+                if (puluhan < 10) kata += satuan[puluhan] + " ";
+                else if (puluhan < 20) kata += belasan[puluhan - 10] + " ";
+                else kata += satuan[Math.floor(puluhan / 10)] + " Puluh " + satuan[puluhan % 10] + " ";
+              }
+              if (kata !== "") str = kata + ribuan[i] + " " + str;
+              angka = Math.floor(angka / 1000);
+              i++;
+            }
+            return str.trim() || "Nol";
+          }
+        </script>
+
+      </body></html>
     `);
     win.document.close();
   });
