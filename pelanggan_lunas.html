@@ -6,24 +6,37 @@
   <title>Data Pelanggan Lunas</title>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="pelanggan_lunas.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+  </style>
 </head>
 <body>
   <h2>Data Pelanggan Lunas</h2>
 
-  <div class= table-container>
-  <table id="pelangganlunas" class="display">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Nama</th>
-        <th>Paket</th>
-        <th>Keterangan</th>
-        <th>Harga</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="table-container">
+    <table id="tabelPelangganLunas" class="display">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Paket</th>
+          <th>Keterangan</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
   
   <!-- Firebase & Script -->
@@ -33,6 +46,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <script>
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
       authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -42,48 +56,52 @@
       messagingSenderId: "605020393823",
       appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Tampilkan Data Pelanggan Lunas
     function loadPelangganLunas() {
-      document.addEventListener('DOMContentLoaded', () => {
-  db.ref('pelanggan').on('value', snapshot => {
-    const tbody = document.querySelector('#pelangganlunas tbody');
-    let data = '', no = 1, total = 0;
-    snapshot.forEach(child => {
-      const p = child.val();
-      total += parseInt(p.harga);
-      data += `
-        <tr>
-          <td>${no++}</td>
-          <td>${p.nama}</td>
-          <td>${p.paket}</td>
-          <td>${p.keterangan}</td>
-          <td>Rp ${p.harga}</td>
-          <td>
-            <button onclick="kembalikanPelanggan('${child.key}')">Kembali</button>
-            <button onclick="lihatFaktur('${child.key}')">Faktur</button>
-          </td>
-        </tr>`;
-    });
-    tbody.innerHTML = data;
-  });
-        $(document).ready(function() {
-          $('#pelangganlunas').DataTable();
-});
+      const tbody = document.querySelector('#tabelPelangganLunas tbody');
 
+      db.ref('pelangganlunas').on('value', snapshot => {
+        let data = '', no = 1;
 
+        snapshot.forEach(child => {
+          const p = child.val();
+          data += `
+            <tr>
+              <td>${no++}</td>
+              <td>${p.nama}</td>
+              <td>${p.paket}</td>
+              <td>${p.keterangan}</td>
+              <td>Rp ${parseInt(p.harga).toLocaleString('id-ID')}</td>
+              <td>
+                <button onclick="kembalikanPelanggan('${child.key}')">Kembalikan</button>
+                <button onclick="lihatFaktur('${child.key}')">Faktur</button>
+              </td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = data;
+
+        // Aktifkan DataTables hanya sekali
+        if (!$.fn.DataTable.isDataTable('#tabelPelangganLunas')) {
+          $('#tabelPelangganLunas').DataTable();
+        }
+      });
+    }
+
+    // Fungsi Kembalikan
     function kembalikanPelanggan(id) {
       db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
         db.ref('pelanggan/' + id).set(snapshot.val(), () => {
           db.ref('pelangganlunas/' + id).remove();
           alert('Data dikembalikan ke pelanggan aktif!');
-          location.reload();
         });
       });
     }
 
+    // Fungsi Lihat Faktur
     function lihatFaktur(id) {
       db.ref('pelangganlunas/' + id).once('value').then(snapshot => {
         const d = snapshot.val();
@@ -116,7 +134,7 @@
           <p><strong>Nama:</strong> ${d.nama}</p>
           <p><strong>Paket:</strong> ${d.paket}</p>
           <p><strong>Keterangan:</strong> ${d.keterangan}</p>
-          <p><strong>Harga:</strong> Rp ${d.harga}</p>
+          <p><strong>Harga:</strong> Rp ${parseInt(d.harga).toLocaleString('id-ID')}</p>
           <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString()}</p>
           <div class="lunas">LUNAS</div>
           <div class="paraf">Paraf: ______________________</div>
@@ -132,6 +150,7 @@
       });
     }
 
+    // Jalankan saat halaman dimuat
     document.addEventListener('DOMContentLoaded', loadPelangganLunas);
   </script>
 </body>
