@@ -1,75 +1,64 @@
-/* Background Animasi Gradient */
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* General Styles */
-/* Reset dan dasar */
-body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(270deg, #6a11cb, #2575fc, #6a11cb);
-  background-size: 600% 600%;
-  animation: gradientMove 15s ease infinite;
+/* Reset */
+* {
   margin: 0;
-  padding: 20px;
-  color: #333;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Judul halaman */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  padding: 20px;
+}
+
+/* Heading */
 h2 {
   text-align: center;
-  color: #2c3e50;
   margin-bottom: 20px;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 24px;
 }
 
-/* Container tabel */
+/* Table Container */
 .table-container {
-  background: #ffffff;
+  background: #fff;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   overflow-x: auto;
 }
 
-/* Tabel */
+/* DataTable */
 #tabelPelangganLunas {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 30px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-}
 }
 
 #tabelPelangganLunas thead {
-  background-color: #3498db;
-  color: #ffffff;
-}
-
-#tabelPelangganLunas th {
-  background: linear-gradient(90deg, #26a69a, #009688);
+  background: linear-gradient(45deg, #3498db, #2ecc71);
   color: white;
-  padding: 16px;
-  font-size: 1rem;
-  letter-spacing: 1px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
+#tabelPelangganLunas th,
 #tabelPelangganLunas td {
+  padding: 12px 15px;
   text-align: center;
-  padding: 14px;
-  font-size: 0.95rem;
+  border: 1px solid #ddd;
 }
 
-#tabelPelangganLunas tr:nth-child(even) {
-  background-color: #f2f2f2;
+#tabelPelangganLunas tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
 }
 
-#tabelPelangganLunas tr:hover {
+#tabelPelangganLunas tbody tr:hover {
   background-color: #eaf2f8;
+  cursor: pointer;
 }
 
 /* Tombol */
@@ -77,42 +66,48 @@ button {
   padding: 6px 12px;
   margin: 2px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 13px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease-in-out;
 }
 
 button:hover {
-  opacity: 0.9;
-}
-
-button:active {
-  transform: scale(0.98);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 button[onclick^="kembalikanPelanggan"] {
   background-color: #e67e22;
-  color: #ffffff;
+  color: #fff;
 }
 
 button[onclick^="lihatFaktur"] {
   background-color: #27ae60;
-  color: #ffffff;
+  color: #fff;
+}
+
+button[onclick^="kembalikanPelanggan"]:hover {
+  background-color: #d35400;
+}
+
+button[onclick^="lihatFaktur"]:hover {
+  background-color: #219150;
+}
+
+/* Scrollbar */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
 }
 
 /* Responsif */
 @media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-
   h2 {
     font-size: 20px;
-  }
-
-  .table-container {
-    padding: 10px;
   }
 
   #tabelPelangganLunas th,
@@ -122,7 +117,7 @@ button[onclick^="lihatFaktur"] {
   }
 
   button {
-    font-size: 12px;
+    font-size: 11px;
     padding: 4px 8px;
   }
 }
