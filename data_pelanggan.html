@@ -30,6 +30,29 @@
   </table>
 </div>
 
+  <!-- Modal Tambah Pelanggan -->
+<div id="modalTambah" class="modal">
+  <div class="modal-content">
+    <h3>Tambah Pelanggan Baru</h3>
+    <label for="namaBaru">Nama:</label>
+    <input type="text" id="namaBaru" placeholder="Masukkan nama pelanggan">
+
+    <label for="paketBaru">Paket:</label>
+    <input type="text" id="paketBaru" placeholder="Masukkan nama paket">
+
+    <label for="keteranganBaru">Keterangan:</label>
+    <input type="text" id="keteranganBaru" placeholder="Keterangan pelanggan">
+
+    <label for="hargaBaru">Harga:</label>
+    <input type="number" id="hargaBaru" placeholder="Harga paket">
+
+    <div class="modal-actions">
+      <button onclick="simpanPelangganBaru()">Simpan</button>
+      <button onclick="tutupModalTambah()">Batal</button>
+    </div>
+  </div>
+</div>
+
   <!-- Modal Pilihan Metode Pembayaran -->
 <div id="modalMetode" class="modal">
   <div class="modal-content">
@@ -82,10 +105,22 @@
                 <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')">Bayar</button>
                 <button class="aksi-btn edit" onclick="editPelanggan('${id}')">Edit</button>
                 <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')">Hapus</button>
-                <button class="aksi-btn tambah" onclick="bukaModalTambah()">+ Tambah Pelanggan</button>
               </td>
             </tr>`;
         });
+
+        tbody.innerHTML += `
+
+      <tr>
+
+        <td colspan="6" style="text-align:center;">
+
+          <button class="aksi-btn tambah" onclick="bukaModalTambah()">+ Tambah Pelanggan Baru</button>
+
+        </td>
+
+      </tr>`;
+        
         if (!$.fn.DataTable.isDataTable('#tabelPelanggan')) {
         $('#tabelPelanggan').DataTable();
         }
