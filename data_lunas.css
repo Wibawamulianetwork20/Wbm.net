@@ -50,14 +50,17 @@ table {
 
 thead {
   background: linear-gradient(45deg, #3498db, #2ecc71);
-  color: lightgreen;
-  font-weight: 600;
+  font-weight: bold;
   font-size: 15px;
 }
 
 th, td {
   padding: 14px 13px;
   text-align: center;
+  font-weight: bold;
+  background: linear-gradient(90deg, #f2de4f, #42f7f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
