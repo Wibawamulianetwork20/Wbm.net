@@ -24,7 +24,7 @@ body {
 }
 
 /* Input File JSON */
-.input-json {
+#jsonFile {
   display: inline-block;
   padding: 10px 16px;
   background: linear-gradient(45deg, #7f00ff, #e100ff);
@@ -37,12 +37,12 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.input-json:hover {
+#jsonFile:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
 
-.input-json input[type="file"] {
+#jsonFile input[type="file"] {
   display: none;
 }
 
