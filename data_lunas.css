@@ -8,12 +8,9 @@
 body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #4facfe, #00f2fe);
-  color: #fff;
+  color: #333;
   min-height: 100vh;
   padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .container {
@@ -37,7 +34,6 @@ h2 {
   -webkit-text-fill-color: transparent;
 }
 
-/* Table Container */
 .table-container {
   overflow-x: auto;
   margin-top: 20px;
@@ -45,6 +41,7 @@ h2 {
 
 table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
   border-radius: 8px;
   overflow: hidden;
@@ -59,9 +56,9 @@ thead {
 }
 
 th, td {
-  padding: 14px 13px;
+  padding: 12px 15px;
   text-align: center;
-  font-weight: bold;
+  font-weight: 600;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -211,7 +208,7 @@ button[onclick^="lihatFaktur"] {
 
   th, td {
     font-size: 12px;
-    padding: 10px;
+    padding: 8px 10px;
   }
 
   button {
