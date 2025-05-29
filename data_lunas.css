@@ -197,11 +197,6 @@ button[onclick^="lihatFaktur"] {
   background: linear-gradient(45deg, #ff416c, #ff4b2b);
 }
 
-@keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 /* Responsif */
 @media (max-width: 768px) {
   h2 {
