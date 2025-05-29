@@ -94,19 +94,6 @@
         snapshot.forEach(child => {
           const data = child.val();
           const id = child.key;
-
-tbody.innerHTML += `
-
-      <tr>
-
-        <td colspan="6" style="text-align:center;">
-
-          <button class="aksi-btn tambah" onclick="bukaModalTambah()">+ Tambah Pelanggan Baru</button>
-
-        </td>
-
-      </tr>`;
-          
           tbody.innerHTML += `
             <tr>
               <td>${no++}</td>
