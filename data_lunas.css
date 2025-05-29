@@ -50,7 +50,9 @@ table {
 
 thead {
   background: linear-gradient(45deg, #3498db, #2ecc71);
-  color: #fff;
+  background: linear-gradient(90deg, #f2de4f, #42f7f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: 600;
   font-size: 15px;
 }
@@ -82,7 +84,9 @@ button {
   transition: all 0.2s ease-in-out;
   font-weight: 600;
   letter-spacing: 0.5px;
-  color: #fff;
+  background: linear-gradient(90deg, #f2de4f, #42f7f3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
