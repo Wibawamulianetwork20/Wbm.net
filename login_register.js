@@ -95,3 +95,22 @@ if (loginForm) {
       });
   });
 }
+
+const passwordInput = document.getElementById('password');
+const togglePassword = document.getElementById('togglePassword');
+
+togglePassword.addEventListener('click', function () {
+  const isPassword = passwordInput.getAttribute('type') === 'password';
+  passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+
+  // Ganti icon eye/eye-off
+  togglePassword.innerHTML = isPassword
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off">
+        <path d="M17.94 17.94A10.1 10.1 0 0112 20c-7 0-11-8-11-8a16.3 16.3 0 015.17-5.83M2 2l20 20"></path>
+        <path d="M9.88 9.88a3 3 0 014.24 4.24"></path>
+      </svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>`;
+});
