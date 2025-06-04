@@ -36,6 +36,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+// Pendaftaran Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then((registration) => {
+      console.log('Service Worker terdaftar dengan sukses:', registration);
+    })
+    .catch((error) => {
+      console.log('Pendaftaran Service Worker gagal:', error);
+    });
+}
+
+// Menangani event beforeinstallprompt
 let deferredPrompt;
 const installBtn = document.getElementById('installBtn');
 
@@ -56,4 +68,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
       deferredPrompt = null;
     });
   });
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('Aplikasi telah diinstal');
 });
