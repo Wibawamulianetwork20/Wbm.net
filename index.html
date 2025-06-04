@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <meta name="theme-color" content="#0d6efd">
+  <!-- Ikon dan Manifest -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- Untuk iOS (Safari) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="eBilling">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icon-192.png">
   <title>Wibawamulia.Network</title>
 
   <!-- Bootstrap -->
@@ -161,12 +168,6 @@
     document.getElementById("loadingOverlay").style.display = "none";
   });
 </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(() => console.log('Service Worker registered.'));
-  }
-</script>
 <script>
   // Scroll Reveal Animasi
   ScrollReveal().reveal('.boxed-section', {
@@ -179,6 +180,12 @@
 
   function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(() => console.log('Service Worker registered.'));
   }
 </script>
 <script src="script.js"></script>
