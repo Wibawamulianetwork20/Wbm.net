@@ -1,14 +1,7 @@
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open('app-cache').then(cache => {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/style.css',
-        '/data_pelanggan.js',
-        '/icon-192.png',
-        '/icon-512.png'
-      ]);
+    caches.open('wibawa-cache').then(cache => {
+      return cache.addAll(['./', './index.html', './style.css']);
     })
   );
 });
