@@ -1,10 +1,11 @@
 {
-  "name": "eBilling Pelanggan",
-  "short_name": "eBilling",
-  "start_url": ".",
+  "name": "Wibawamulia Network",
+  "short_name": "Wibawamulia",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",
+  "description": "Aplikasi Wibawamulia.Network",
   "icons": [
     {
       "src": "icon-192.png",
