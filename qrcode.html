@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pembayaran via Dropdown</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+  <h3 class="text-center mb-4">Pembayaran Pelanggan</h3>
+
+  <div class="mb-3">
+    <label for="idSelect" class="form-label">Pilih ID Pelanggan:</label>
+    <select id="idSelect" class="form-select">
+      <option value="">-- Pilih ID --</option>
+    </select>
+  </div>
+
+  <div id="dataBox" class="border rounded p-3 d-none">
+    <p><strong>Nama:</strong> <span id="nama"></span></p>
+    <p><strong>Paket:</strong> <span id="paket"></span></p>
+    <p><strong>Harga:</strong> Rp <span id="harga"></span></p>
+    <button class="btn btn-success" onclick="bayar()">Bayar</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  // Konfigurasi Firebase (GANTI dengan milikmu)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+  authDomain: "wibawamulianetwork.firebaseapp.com",
+  databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wibawamulianetwork",
+  storageBucket: "wibawamulianetwork.firebasestorage.app",
+  messagingSenderId: "605020393823",
+  appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
+  measurementId: "G-9EWJE8F5FG"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const select = document.getElementById('idSelect');
+  const nama = document.getElementById('nama');
+  const paket = document.getElementById('paket');
+  const harga = document.getElementById('harga');
+  const box = document.getElementById('dataBox');
+  let selectedID = '';
+
+  // Ambil daftar ID pelanggan
+  db.ref('pelanggan/aktif').once('value', snapshot => {
+    snapshot.forEach(child => {
+      const id = child.key;
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = id;
+      select.appendChild(option);
+    });
+  });
+
+  // Saat ID dipilih
+  select.addEventListener('change', () => {
+    selectedID = select.value;
+    if (selectedID === '') {
+      box.classList.add('d-none');
+      return;
+    }
+
+    db.ref('pelanggan/aktif/' + selectedID).once('value').then(snap => {
+      const data = snap.val();
+      nama.textContent = data.nama;
+      paket.textContent = data.paket;
+      harga.textContent = Number(data.harga).toLocaleString();
+      box.classList.remove('d-none');
+    });
+  });
+
+  function bayar() {
+    const ref = db.ref('pelanggan/aktif/' + selectedID);
+    ref.once('value').then(snapshot => {
+      const data = snapshot.val();
+      const tanggal = new Date().toISOString().split('T')[0];
+      db.ref('pelanggan/lunas/' + selectedID).set({
+        ...data,
+        tanggalBayar: tanggal
+      }).then(() => {
+        ref.remove();
+        alert("Pembayaran berhasil!");
+        location.reload();
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
