@@ -51,16 +51,19 @@
   const box = document.getElementById('dataBox');
   let selectedID = '';
 
-  // Ambil daftar ID pelanggan
-  db.ref('pelanggan/aktif').once('value', snapshot => {
-    snapshot.forEach(child => {
-      const id = child.key;
-      const option = document.createElement('option');
-      option.value = id;
-      option.textContent = id;
-      select.appendChild(option);
-    });
+
+  
+  // Ambil daftar ID pelanggan dari Firebase (key acak)
+db.ref('pelanggan/aktif').once('value', snapshot => {
+  snapshot.forEach(child => {
+    const id = child.key; // ID acak dari Firebase
+    const data = child.val();
+    const option = document.createElement('option');
+    option.value = id;
+    option.textContent = `${data.nama} (${id.slice(-5)})`; // tampilkan nama + potongan ID
+    select.appendChild(option);
   });
+});
 
   // Saat ID dipilih
   select.addEventListener('change', () => {
