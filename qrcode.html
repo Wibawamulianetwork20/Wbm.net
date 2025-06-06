@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pembayaran Pelanggan - QR</title>
+  <title>Pembayaran Pelanggan</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
@@ -13,11 +12,16 @@
 <body class="bg-light">
 
 <div class="container py-5">
-  <h3 class="text-center mb-4">Scan QR Pelanggan</h3>
-  <div id="scanner" style="max-width:400px;margin:auto;"></div>
+  <h3 class="text-center mb-4">Pembayaran Pelanggan</h3>
 
-  <div id="infoSection" class="mt-5 d-none">
-    <h4 class="text-center">Informasi Pelanggan</h4>
+  <div class="mb-3">
+    <label for="idSelect" class="form-label">Pilih ID Pelanggan</label>
+    <select id="idSelect" class="form-select">
+      <option value="">-- Pilih --</option>
+    </select>
+  </div>
+
+  <div id="infoSection" class="d-none">
     <ul class="list-group mb-3">
       <li class="list-group-item"><strong>Nama:</strong> <span id="nama"></span></li>
       <li class="list-group-item"><strong>Paket:</strong> <span id="paket"></span></li>
@@ -25,26 +29,24 @@
     </ul>
 
     <div class="alert alert-info">
-      <strong>Silakan transfer ke salah satu rekening berikut:</strong>
-      <ul class="mb-0">
-        <li>BNI - 1234567890 a.n WibawaNet</li>
-        <li>BRI - 0987654321 a.n WibawaNet</li>
-        <li>DANA - 081234567890 a.n WibawaNet</li>
+      <strong>Transfer ke:</strong>
+      <ul>
+        <li>BNI: 1234567890 a.n WibawaNet</li>
+        <li>DANA: 081234567890 a.n WibawaNet</li>
       </ul>
     </div>
 
     <div class="mb-3">
       <label for="bukti" class="form-label">Upload Bukti Transfer</label>
-      <input type="file" class="form-control" id="bukti" accept="image/*,.pdf">
+      <input type="file" id="bukti" class="form-control" accept="image/*,.pdf" />
     </div>
 
     <button class="btn btn-success" onclick="bayar()">Konfirmasi Pembayaran</button>
-    <div id="fakturLink" class="mt-4 text-center"></div>
+    <div id="fakturLink" class="mt-3 text-center"></div>
   </div>
 </div>
 
 <script>
-  // 🔧 Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
   authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -59,76 +61,76 @@
   const db = firebase.database();
   const storage = firebase.storage();
 
-  let pelangganId = "";
+  const select = document.getElementById("idSelect");
+  const infoSection = document.getElementById("infoSection");
   const namaEl = document.getElementById("nama");
   const paketEl = document.getElementById("paket");
   const hargaEl = document.getElementById("harga");
-  const infoSection = document.getElementById("infoSection");
   const fakturLink = document.getElementById("fakturLink");
 
-  // 🚀 Mulai Scanner QR
-  const scanner = new Html5Qrcode("scanner");
-  Html5Qrcode.getCameras().then(devices => {
-    if (devices.length > 0) {
-      scanner.start(devices[0].id, { fps: 10, qrbox: 250 }, qrCodeMessage => {
-        scanner.stop();
-        pelangganId = qrCodeMessage.trim();
-        loadData(pelangganId);
-      });
-    }
+  let selectedID = "";
+
+  // Isi dropdown dari pelanggan/
+  db.ref("pelanggan").once("value").then(snapshot => {
+    snapshot.forEach(child => {
+      const opt = document.createElement("option");
+      opt.value = child.key;
+      opt.textContent = child.key;
+      select.appendChild(opt);
+    });
   });
 
-  function loadData(id) {
-    db.ref("pelanggan/" + id).once("value").then(snapshot => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        namaEl.textContent = data.nama;
-        paketEl.textContent = data.paket;
-        hargaEl.textContent = Number(data.harga).toLocaleString();
-        infoSection.classList.remove("d-none");
-      } else {
-        alert("Data pelanggan tidak ditemukan.");
-      }
+  // Saat memilih pelanggan
+  select.addEventListener("change", () => {
+    selectedID = select.value;
+    if (!selectedID) return infoSection.classList.add("d-none");
+
+    db.ref("pelanggan/" + selectedID).once("value").then(snap => {
+      const data = snap.val();
+      namaEl.textContent = data.nama;
+      paketEl.textContent = data.paket;
+      hargaEl.textContent = Number(data.harga).toLocaleString();
+      infoSection.classList.remove("d-none");
     });
-  }
+  });
 
   function bayar() {
-    const bukti = document.getElementById("bukti").files[0];
-    if (!bukti) {
-      alert("Silakan upload bukti transfer terlebih dahulu.");
-      return;
-    }
+    const file = document.getElementById("bukti").files[0];
+    if (!file) return alert("Upload bukti dulu.");
 
-    const path = "bukti_transfer/" + pelangganId + "_" + Date.now();
-    const refAktif = db.ref("pelanggan/" + pelangganId);
+    const refAktif = db.ref("pelanggan/" + selectedID);
+    const storagePath = "bukti_transfer/" + selectedID + "_" + Date.now();
 
-    refAktif.once("value").then(snapshot => {
-      const data = snapshot.val();
+    refAktif.once("value").then(snap => {
+      const data = snap.val();
       const tanggal = new Date().toISOString().split("T")[0];
 
-      return storage.ref(path).put(bukti).then(snap => snap.ref.getDownloadURL()).then(url => {
-        // Simpan ke pelangganlunas dan hapus dari pelanggan
-        return db.ref("pelangganlunas/" + pelangganId).set({
-          ...data,
-          tanggalBayar: tanggal,
-          buktiTransfer: url
-        }).then(() => refAktif.remove());
-      });
+      return storage.ref(storagePath).put(file).then(uploadSnap =>
+        uploadSnap.ref.getDownloadURL().then(url => {
+          return db.ref("pelangganlunas/" + selectedID).set({
+            ...data,
+            tanggalBayar: tanggal,
+            buktiTransfer: url
+          }).then(() => refAktif.remove());
+        })
+      );
     }).then(() => {
       alert("Pembayaran berhasil!");
-      tampilkanFaktur(pelangganId);
+      tampilkanFaktur(selectedID);
     }).catch(err => {
       console.error(err);
-      alert("Terjadi kesalahan saat menyimpan data.");
+      alert("Gagal proses pembayaran.");
     });
   }
 
   function tampilkanFaktur(id) {
     db.ref("faktur/" + id).once("value").then(snapshot => {
-      const fakturURL = snapshot.val();
-      if (fakturURL) {
+      const url = snapshot.val();
+      if (url) {
         fakturLink.innerHTML = `
-          <a href="${fakturURL}" class="btn btn-primary" target="_blank">Lihat Faktur Pembayaran</a>
+          <a href="${url}" target="_blank" class="btn btn-primary mt-2">
+            Lihat Faktur Pembayaran
+          </a>
         `;
       } else {
         fakturLink.innerHTML = `<div class="text-muted">Faktur belum tersedia.</div>`;
@@ -136,5 +138,6 @@
     });
   }
 </script>
+
 </body>
 </html>
