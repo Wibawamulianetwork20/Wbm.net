@@ -26,18 +26,27 @@ if (registerForm) {
     const password = document.getElementById('password').value;
 
     auth.createUserWithEmailAndPassword(email, password)
-      .then((cred) => {
-        return db.collection('users').doc(cred.user.uid).set({
-        uid: cred.user.uid,
-        name: name,
-        email: email,
-        role: 'pelanggan'
-        });
-      })
-      .then(() => {
-        alert(`Registrasi berhasil dengan email: ${email}\nSilakan login di halaman Login.`);
-        window.location.href = "login.html";
-      })
+  .then((cred) => {
+    // Simpan ke Firestore
+    return db.collection('users').doc(cred.user.uid).set({
+      uid: cred.user.uid,
+      name: name,
+      email: email,
+      role: 'pelanggan'
+    }).then(() => {
+      // Simpan ke Realtime Database juga
+      return firebase.database().ref('pelanggan/aktif/' + cred.user.uid).set({
+        nama: name,
+        paket: "-",
+        harga: 0,
+        keterangan: "Belum bayar"
+      });
+    });
+  })
+  .then(() => {
+    alert("Registrasi berhasil. Silakan login.");
+    window.location.href = "login.html";
+  })
       .catch(err => {
         let message = "Gagal Registrasi: ";
         switch (err.code) {
