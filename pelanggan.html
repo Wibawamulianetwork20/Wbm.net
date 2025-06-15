@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Pelanggan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f9f9f9;
+    }
+    .card {
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">Dashboard Pelanggan</a>
+      <button class="btn btn-outline-light" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Konten Dashboard (disembunyikan saat belum login) -->
+  <div class="container" id="content" style="display: none;">
+    <div class="mb-4">
+      <h4>Halo, <span id="namaPelanggan">Pelanggan</span>!</h4>
+      <p>Berikut adalah rincian tagihan Anda.</p>
+    </div>
+
+    <!-- Info Tagihan -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        Tagihan Bulan Ini
+      </div>
+      <div class="card-body">
+        <p><strong>ID Pelanggan:</strong> <span id="idPelanggan"></span></p>
+        <p><strong>Paket:</strong> <span id="paketPelanggan"></span></p>
+        <p><strong>Harga:</strong> Rp <span id="hargaTagihan">0</span></p>
+        <p><strong>Status:</strong> <span class="badge bg-danger" id="statusTagihan">Belum Lunas</span></p>
+        <button class="btn btn-success mt-2" onclick="konfirmasiBayar()">Konfirmasi Pembayaran</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
+      authDomain: "wibawamulianetwork.firebaseapp.com",
+      databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wibawamulianetwork",
+      storageBucket: "wibawamulianetwork.appspot.com",
+      messagingSenderId: "605020393823",
+      appId: "1:605020393823:web:6ba8afe7e250bc004da6ea",
+      measurementId: "G-9EWJE8F5FG"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
+  </script>
+
+  <!-- Script Logika Pelanggan -->
+  <script>
+    let currentUID = null;
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUID = user.uid;
+        document.getElementById("content").style.display = "block"; // tampilkan isi jika login
+
+        db.collection('users').doc(user.uid).get().then(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            document.getElementById("namaPelanggan").textContent = data.name;
+            document.getElementById("idPelanggan").textContent = data.uid;
+            ambilTagihan(data.uid);
+          }
+        });
+      } else {
+        window.location.href = "login.html"; // jika belum login, redirect
+      }
+    });
+
+    function ambilTagihan(uid) {
+      rtdb.ref('pelanggan/aktif/' + uid).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById("paketPelanggan").textContent = data.paket || '-';
+          document.getElementById("hargaTagihan").textContent = data.harga || '0';
+          document.getElementById("statusTagihan").textContent = "Belum Lunas";
+          document.getElementById("statusTagihan").className = "badge bg-danger";
+        } else {
+          document.getElementById("paketPelanggan").textContent = '-';
+          document.getElementById("hargaTagihan").textContent = '0';
+          document.getElementById("statusTagihan").textContent = "Lunas";
+          document.getElementById("statusTagihan").className = "badge bg-success";
+        }
+      });
+    }
+
+    function konfirmasiBayar() {
+      if (!currentUID) return;
+
+      const konfirmasi = confirm("Yakin ingin konfirmasi pembayaran?");
+      if (!konfirmasi) return;
+
+      rtdb.ref('pelanggan/aktif/' + currentUID).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          // pindahkan ke pelanggan/lunas
+          rtdb.ref('pelanggan/lunas/' + currentUID).set(data).then(() => {
+            rtdb.ref('pelanggan/aktif/' + currentUID).remove();
+            alert("Pembayaran berhasil dikonfirmasi.");
+            window.location.reload();
+          });
+        } else {
+          alert("Data tagihan tidak ditemukan.");
+        }
+      });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>
