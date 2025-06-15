@@ -67,32 +67,51 @@ if (loginForm) {
     const uidField = document.getElementById('id');
 
     auth.signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        if (uidField) uidField.value = user.uid;
-        alert(`Halo, Anda berhasil login dengan akun: ${email}`);
-        window.location.href = "dashboard.html"; // Bisa diarahkan ke dashboard
-      })
-      .catch((error) => {
-        let message = "Gagal Login: ";
-        switch (error.code) {
-          case 'auth/user-not-found':
-            message += "Email tidak ditemukan. Silakan daftar terlebih dahulu.";
-            break;
-          case 'auth/wrong-password':
-            message += "Password salah. Silakan periksa dan coba lagi.";
-            break;
-          case 'auth/invalid-email':
-            message += "Format email tidak valid. Gunakan email yang benar.";
-            break;
-          case 'auth/too-many-requests':
-            message += "Terlalu banyak percobaan login. Coba lagi beberapa saat.";
-            break;
-          default:
-            message += error.message;
-        }
-        alert(message);
-      });
+  .then((userCredential) => {
+    const user = userCredential.user;
+    return db.collection("users").doc(user.uid).get();
+  })
+  .then((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      const role = data.role;
+      if (uidField) uidField.value = doc.id;
+
+      if (role === 'admin') {
+        alert(`Selamat datang Admin: ${data.name}`);
+        window.location.href = "homepage.html"; // halaman admin
+      } else if (role === 'pelanggan') {
+        alert(`Selamat datang Pelanggan: ${data.name}`);
+        window.location.href = "pelanggan.html"; // halaman pelanggan
+      } else {
+        auth.signOut();
+        alert("Akun tidak memiliki peran yang valid.");
+      }
+    } else {
+      auth.signOut();
+      alert("Data pengguna tidak ditemukan.");
+    }
+  })
+  .catch((error) => {
+    let message = "Gagal Login: ";
+    switch (error.code) {
+      case 'auth/user-not-found':
+        message += "Email tidak ditemukan.";
+        break;
+      case 'auth/wrong-password':
+        message += "Password salah.";
+        break;
+      case 'auth/invalid-email':
+        message += "Format email salah.";
+        break;
+      case 'auth/too-many-requests':
+        message += "Terlalu banyak percobaan login.";
+        break;
+      default:
+        message += error.message;
+    }
+    alert(message);
+  });
   });
 }
 
