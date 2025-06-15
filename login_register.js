@@ -28,9 +28,10 @@ if (registerForm) {
     auth.createUserWithEmailAndPassword(email, password)
       .then((cred) => {
         return db.collection('users').doc(cred.user.uid).set({
-          uid: cred.user.uid,
-          name: name,
-          email: email
+        uid: cred.user.uid,
+        name: name,
+        email: email,
+        role: 'pelanggan'
         });
       })
       .then(() => {
