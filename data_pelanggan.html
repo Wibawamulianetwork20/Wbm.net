@@ -7,69 +7,79 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="data_lunas.css" type="text/css" media="all" />
+  <style>
+    .aksi-btn {
+      padding: 5px 10px;
+      margin: 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .aksi-btn.bayar { background-color: #2ecc71; color: white; }
+    .aksi-btn.edit { background-color: #3498db; color: white; }
+    .aksi-btn.hapus { background-color: #e74c3c; color: white; }
+    .aksi-btn.notif { background-color: #f39c12; color: white; }
+  </style>
 </head>
 <body>
-  <div class="container;>
-  <h2>Data Pelanggan</h2>
-
-  <input type="file" id="jsonFile" accept=".json" />
-  <button class="btn" onclick="uploadData()">Upload JSON</button>
-  <button class="btn" onclick="hapusDuplikat()">Hapus Duplikat</button>
-  <button onclick="bukaModalTambah()"> + Tambah Pelanggan Baru</button>
+  <div class="container">
+    <h2>Data Pelanggan</h2>
+    <input type="file" id="jsonFile" accept=".json" />
+    <button class="btn" onclick="uploadData()">Upload JSON</button>
+    <button class="btn" onclick="hapusDuplikat()">Hapus Duplikat</button>
+    <button onclick="bukaModalTambah()"> + Tambah Pelanggan Baru</button>
   </div>
+
   <div class="table-container">
-  <table id="tabelPelanggan" class="display">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>Nama</th>
-        <th>Paket</th>
-        <th>Keterangan</th>
-        <th>Harga</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <table id="tabelPelanggan" class="display">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Paket</th>
+          <th>Keterangan</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-  <!-- Modal Tambah Pelanggan -->
-<div id="modalTambah" class="modal">
-  <div class="modal-content">
-    <h3>Tambah Pelanggan Baru</h3>
-    <label for="namaBaru">Nama:</label>
-    <input type="text" id="namaBaru" placeholder="Masukkan nama pelanggan">
-
-    <label for="paketBaru">Paket:</label>
-    <input type="text" id="paketBaru" placeholder="Masukkan nama paket">
-
-    <label for="keteranganBaru">Keterangan:</label>
-    <input type="text" id="keteranganBaru" placeholder="Keterangan pelanggan">
-
-    <label for="hargaBaru">Harga:</label>
-    <input type="number" id="hargaBaru" placeholder="Harga paket">
-
-    <div class="modal-actions">
-      <button onclick="simpanPelangganBaru()">Simpan</button>
-      <button onclick="tutupModalTambah()">Batal</button>
+  <!-- Modal Tambah -->
+  <div id="modalTambah" class="modal">
+    <div class="modal-content">
+      <h3>Tambah Pelanggan Baru</h3>
+      <label for="namaBaru">Nama:</label>
+      <input type="text" id="namaBaru" placeholder="Masukkan nama pelanggan">
+      <label for="paketBaru">Paket:</label>
+      <input type="text" id="paketBaru" placeholder="Masukkan nama paket">
+      <label for="keteranganBaru">Keterangan:</label>
+      <input type="text" id="keteranganBaru" placeholder="Keterangan pelanggan">
+      <label for="hargaBaru">Harga:</label>
+      <input type="number" id="hargaBaru" placeholder="Harga paket">
+      <div class="modal-actions">
+        <button onclick="simpanPelangganBaru()">Simpan</button>
+        <button onclick="tutupModalTambah()">Batal</button>
+      </div>
     </div>
   </div>
-</div>
 
-  <!-- Modal Pilihan Metode Pembayaran -->
-<div id="modalMetode" class="modal">
-  <div class="modal-content">
-    <h3>Pilih Metode Pembayaran</h3>
-    <select id="metodePembayaran">
-      <option value="Tunai">Tunai</option>
-      <option value="Transfer">Transfer</option>
-      <option value="QRIS">QRIS</option>
-    </select>
-    <button onclick="konfirmasiBayar()">Bayar</button>
-    <button onclick="tutupModal()">Batal</button>
+  <!-- Modal Metode Bayar -->
+  <div id="modalMetode" class="modal">
+    <div class="modal-content">
+      <h3>Pilih Metode Pembayaran</h3>
+      <select id="metodePembayaran">
+        <option value="Tunai">Tunai</option>
+        <option value="Transfer">Transfer</option>
+        <option value="QRIS">QRIS</option>
+      </select>
+      <button onclick="konfirmasiBayar()">Bayar</button>
+      <button onclick="tutupModal()">Batal</button>
+    </div>
   </div>
-</div>
 
+  <!-- SCRIPT -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -86,8 +96,8 @@
       appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
     };
     firebase.initializeApp(firebaseConfig);
-    let idPelangganDipilih = null;
     const db = firebase.database();
+    let idPelangganDipilih = null;
 
     function tampilData() {
       const tbody = document.querySelector('#tabelPelanggan tbody');
@@ -105,9 +115,10 @@
               <td>${data.keterangan}</td>
               <td>${data.harga}</td>
               <td>
-                <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')"><i class="fas fa-money-bill-wave"></i>Bayar</button>
-                <button class="aksi-btn edit" onclick="editPelanggan('${id}')"><i class="fas fa-edit"></i>Edit</button>
-                <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')"><i class="fas fa-trash-alt"></i>Hapus</button>
+                <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')"><i class="fas fa-money-bill-wave"></i></button>
+                <button class="aksi-btn edit" onclick="editPelanggan('${id}')"><i class="fas fa-edit"></i></button>
+                <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')"><i class="fas fa-trash-alt"></i></button>
+                <button class="aksi-btn notif" onclick="kirimNotifikasi('${id}')"><i class="fas fa-bell"></i></button>
               </td>
             </tr>`;
         });
@@ -115,81 +126,58 @@
       });
     }
 
-    // Modal Tambah Pelanggan
-function bukaModalTambah() {
-  document.getElementById("modalTambah").style.display = "block";
-}
+    function bukaModalTambah() {
+      document.getElementById("modalTambah").style.display = "block";
+    }
 
-function tutupModalTambah() {
-  document.getElementById("modalTambah").style.display = "none";
-}
+    function tutupModalTambah() {
+      document.getElementById("modalTambah").style.display = "none";
+    }
 
-function simpanPelangganBaru() {
-  const nama = document.getElementById("namaBaru").value.trim();
-  const paket = document.getElementById("paketBaru").value.trim();
-  const keterangan = document.getElementById("keteranganBaru").value.trim();
-  const harga = document.getElementById("hargaBaru").value.trim();
-
-  if (!nama || !paket || !keterangan || !harga) {
-    alert("Semua field harus diisi!");
-    return;
-  }
-
-  db.ref('pelanggan').push({
-    nama,
-    paket,
-    keterangan,
-    harga
-  }).then(() => {
-    alert("Pelanggan baru berhasil ditambahkan!");
-    tutupModalTambah();
-    location.reload();
-  }).catch(err => {
-    alert("Gagal menambahkan pelanggan: " + err.message);
-  });
-}
-
-function bayarPelanggan(id) {
-  idPelangganDipilih = id;
-  document.getElementById("modalMetode").style.display = "block";
-}
-
-function tutupModal() {
-  document.getElementById("modalMetode").style.display = "none";
-  idPelangganDipilih = null;
-}
-
-function konfirmasiBayar() {
-  const metode = document.getElementById("metodePembayaran").value;
-  if (!idPelangganDipilih) return;
-
-  db.ref('pelanggan/' + idPelangganDipilih).once('value').then(snapshot => {
-    const data = snapshot.val();
-    data.metode = metode;
-    data.tanggal = new Date().toLocaleString('id-ID');
-    data.idFaktur = 'FTR-' + Date.now();
-
-    // Simpan ke pelangganlunas
-    db.ref('pelangganlunas/' + idPelangganDipilih).set(data).then(() => {
-      // Simpan ke pemasukan
-      db.ref('pemasukan').push({
-        kategori: 'langganan',
-        harga: data.harga,
-        metode: metode
+    function simpanPelangganBaru() {
+      const nama = document.getElementById("namaBaru").value.trim();
+      const paket = document.getElementById("paketBaru").value.trim();
+      const keterangan = document.getElementById("keteranganBaru").value.trim();
+      const harga = document.getElementById("hargaBaru").value.trim();
+      if (!nama || !paket || !keterangan || !harga) {
+        alert("Semua field harus diisi!");
+        return;
+      }
+      db.ref('pelanggan').push({ nama, paket, keterangan, harga }).then(() => {
+        alert("Pelanggan baru berhasil ditambahkan!");
+        tutupModalTambah();
+        location.reload();
       });
+    }
 
-      // Simpan ke faktur
-      db.ref('faktur/' + idPelangganDipilih).set(data);
+    function bayarPelanggan(id) {
+      idPelangganDipilih = id;
+      document.getElementById("modalMetode").style.display = "block";
+    }
 
-      // Hapus dari pelanggan
-      db.ref('pelanggan/' + idPelangganDipilih).remove();
+    function tutupModal() {
+      document.getElementById("modalMetode").style.display = "none";
+      idPelangganDipilih = null;
+    }
 
-      alert("Data dipindahkan ke pelanggan lunas, tercatat di pemasukan, dan faktur dibuat!");
-      tutupModal();
-      location.reload();
-    });
-  });
-}
+    function konfirmasiBayar() {
+      const metode = document.getElementById("metodePembayaran").value;
+      if (!idPelangganDipilih) return;
+      db.ref('pelanggan/' + idPelangganDipilih).once('value').then(snapshot => {
+        const data = snapshot.val();
+        data.metode = metode;
+        data.tanggal = new Date().toLocaleString('id-ID');
+        data.idFaktur = 'FTR-' + Date.now();
+        db.ref('pelangganlunas/' + idPelangganDipilih).set(data).then(() => {
+          db.ref('pemasukan').push({ kategori: 'langganan', harga: data.harga, metode: metode });
+          db.ref('faktur/' + idPelangganDipilih).set(data);
+          db.ref('pelanggan/' + idPelangganDipilih).remove();
+          alert("Pembayaran berhasil diproses!");
+          tutupModal();
+          location.reload();
+        });
+      });
+    }
 
     function editPelanggan(id) {
       db.ref('pelanggan/' + id).once('value').then(snapshot => {
@@ -212,23 +200,35 @@ function konfirmasiBayar() {
       }
     }
 
+    function kirimNotifikasi(id) {
+      db.ref('pelanggan/' + id).once('value').then(snapshot => {
+        const data = snapshot.val();
+        const waktu = new Date().toLocaleString('id-ID');
+        const pesan = `Halo ${data.nama}, tagihan Anda sebesar Rp${data.harga} untuk paket ${data.paket} sudah jatuh tempo. Segera lakukan pembayaran.`;
+        const notifikasi = {
+          nama: data.nama,
+          paket: data.paket,
+          harga: data.harga,
+          waktu: waktu,
+          pesan: pesan,
+          status: 'belum dibaca'
+        };
+        db.ref('notifikasi/' + id).push(notifikasi)
+          .then(() => alert('Notifikasi penagihan berhasil dikirim!'))
+          .catch(err => alert('Gagal mengirim notifikasi: ' + err.message));
+      });
+    }
+
     function uploadData() {
-      const fileInput = document.getElementById('jsonFile');
-      const file = fileInput.files[0];
-      if (!file) {
-        alert('Pilih file JSON terlebih dahulu!');
-        return;
-      }
+      const file = document.getElementById('jsonFile').files[0];
+      if (!file) return alert('Pilih file JSON terlebih dahulu!');
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
-          const jsonData = JSON.parse(e.target.result);
-          const dbRef = db.ref('pelanggan');
-          for (let key in jsonData) {
-            dbRef.push(jsonData[key]);
-          }
-          alert('Data JSON berhasil diupload!');
-        } catch (err) {
+          const data = JSON.parse(e.target.result);
+          for (let key in data) db.ref('pelanggan').push(data[key]);
+          alert('Data berhasil diupload!');
+        } catch {
           alert('Format file JSON salah!');
         }
       };
@@ -242,11 +242,8 @@ function konfirmasiBayar() {
         snapshot.forEach(child => {
           const data = child.val();
           const key = data.nama + '-' + data.paket;
-          if (seen[key]) {
-            db.ref('pelanggan/' + child.key).remove();
-          } else {
-            seen[key] = true;
-          }
+          if (seen[key]) db.ref('pelanggan/' + child.key).remove();
+          else seen[key] = true;
         });
         alert('Data duplikat dihapus!');
       });
