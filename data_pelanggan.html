@@ -116,113 +116,130 @@
   const app = firebase.initializeApp(firebaseConfig);
   const db = app.database();
 
-  // Fungsi tampilkan data tabel
-  function tampilData() {
-    const tbody = document.querySelector('#tabelPelanggan tbody');
-    db.ref('pelanggan').on('value', snapshot => {
-      tbody.innerHTML = '';
-      let no = 1;
-      snapshot.forEach(child => {
-        const data = child.val();
-        const id = child.key;
-        tbody.innerHTML += `
-          <tr>
-            <td>${no++}</td>
-            <td>${data.nama}</td>
-            <td>${data.alamat || '-'}</td>
-            <td>${data.telepon || '-'}</td>
-            <td>${data.paket || '-'}</td>
-            <td>Rp${data.harga || 0}</td>
-            <td>
-              <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')"><i class="fas fa-money-bill-wave"></i></button>
-              <button class="aksi-btn edit" onclick="editPelanggan('${id}')"><i class="fas fa-edit"></i></button>
-              <button class="aksi-btn hapus" onclick="hapusPelanggan('${id}')"><i class="fas fa-trash-alt"></i></button>
-              <button class="aksi-btn notif" onclick="kirimNotifikasi('${id}')"><i class="fas fa-bell"></i></button>
-            </td>
-          </tr>`;
-      });
+  let table;
+  let lastKey = null; // key terakhir untuk pagination
+  const limit = 50;   // jumlah data per load
+  let loading = false;
 
-      // Refresh DataTable
-      if ($.fn.DataTable.isDataTable('#tabelPelanggan')) {
-        $('#tabelPelanggan').DataTable().destroy();
+  $(document).ready(() => {
+    table = $('#tabelPelanggan').DataTable({
+      pageLength: 25,
+      ordering: false,
+      searching: true,
+      destroy: true
+    });
+
+    // Load dari cache dulu
+    const cache = localStorage.getItem("pelangganCache");
+    if (cache) {
+      const data = JSON.parse(cache);
+      renderTable(data);
+      console.log("✅ Data dari cache ditampilkan");
+    }
+
+    // Load pertama dari Firebase
+    loadPelanggan();
+
+    // Infinite scroll
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+        if (!loading) loadPelanggan();
       }
-      $('#tabelPelanggan').DataTable();
+    });
+  });
+
+  // Fungsi load pelanggan batch
+  function loadPelanggan() {
+    loading = true;
+    document.getElementById("status").textContent = "⏳ Memuat data...";
+
+    let query = db.ref('pelanggan').orderByKey().limitToFirst(limit);
+    if (lastKey) {
+      query = db.ref('pelanggan').orderByKey().startAfter(lastKey).limitToFirst(limit);
+    }
+
+    query.once('value', snapshot => {
+      const data = [];
+      snapshot.forEach(child => {
+        data.push({ id: child.key, ...child.val() });
+        lastKey = child.key;
+      });
+      if (data.length > 0) {
+        renderTable(data, true);
+        // Simpan cache
+        const existing = JSON.parse(localStorage.getItem("pelangganCache") || "[]");
+        localStorage.setItem("pelangganCache", JSON.stringify(existing.concat(data)));
+        document.getElementById("status").textContent = "Scroll ke bawah untuk memuat lebih banyak...";
+      } else {
+        document.getElementById("status").textContent = "✅ Semua data sudah dimuat.";
+      }
+      loading = false;
     });
   }
 
-  // Import pelanggan dari Google Earth (KML) ke Firebase
-  function importDariKML() {
-  fetch("Wbmnet.xml") // sudah diubah dari .kml ke .xml
-    .then(res => res.text())
-    .then(kmltext => {
-      const parser = new DOMParser();
-      const kml = parser.parseFromString(kmltext, "text/xml");
-      const geojson = toGeoJSON.kml(kml);
-
-      geojson.features.forEach(f => {
-        const nama = f.properties.name || "Tanpa Nama";
-        const coords = f.geometry.coordinates; // [lon, lat, alt]
-
-        db.ref("pelanggan").orderByChild("nama").equalTo(nama).once("value", snapshot => {
-          if (!snapshot.exists()) {
-            db.ref("pelanggan").push({
-              nama: nama,
-              alamat: "-",
-              telepon: "-",
-              paket: "-",
-              harga: 0,
-              longitude: coords[0],
-              latitude: coords[1]
-            });
-            console.log("✅ Ditambahkan:", nama);
-          }
-        });
-      });
-
-      alert("Import pelanggan dari XML selesai ✅");
-    })
-    .catch(err => {
-      console.error("❌ Error import XML:", err);
-      alert("Gagal membaca pelanggan.xml");
+  // Render data ke DataTables
+  function renderTable(data, append=false) {
+    if (!append) table.clear();
+    let no = table.data().count() + 1;
+    data.forEach(item => {
+      table.row.add([
+        no++,
+        item.nama,
+        item.alamat || "-",
+        item.telepon || "-",
+        item.paket || "-",
+        "Rp" + (item.harga || 0),
+        `
+        <button class="aksi-btn bayar" onclick="bayar('${item.id}')"><i class="fas fa-money-bill"></i></button>
+        <button class="aksi-btn edit" onclick="edit('${item.id}')"><i class="fas fa-edit"></i></button>
+        <button class="aksi-btn hapus" onclick="hapus('${item.id}')"><i class="fas fa-trash"></i></button>
+        <button class="aksi-btn notif" onclick="notif('${item.id}')"><i class="fas fa-bell"></i></button>
+        `
+      ]);
     });
-}
+    table.draw(false);
+  }
+
+  // Import pelanggan dari XML
+  function importDariXML() {
+    fetch("pelanggan.xml")
+      .then(res => res.text())
+      .then(kmltext => {
+        const parser = new DOMParser();
+        const kml = parser.parseFromString(kmltext, "text/xml");
+        const geojson = toGeoJSON.kml(kml);
+
+        let baru = 0, sudah = 0;
+        geojson.features.forEach(f => {
+          const nama = f.properties.name || "Tanpa Nama";
+          const coords = f.geometry.coordinates;
+
+          db.ref("pelanggan").orderByChild("nama").equalTo(nama).once("value", snap => {
+            if (!snap.exists()) {
+              db.ref("pelanggan").push({
+                nama, alamat: "-", telepon: "-", paket: "-", harga: 0,
+                longitude: coords[0], latitude: coords[1]
+              });
+              baru++;
+            } else {
+              sudah++;
+            }
+          });
+        });
+
+        setTimeout(() => {
+          alert(`Import selesai!\nDitambahkan: ${baru}\nSudah ada: ${sudah}`);
+          location.reload();
+        }, 1500);
+      })
+      .catch(err => alert("Gagal membaca pelanggan.xml: " + err));
+  }
 
   // Aksi tombol
-  function bayarPelanggan(id) {
-    alert("💰 Fitur bayar untuk pelanggan ID: " + id);
-  }
-
-  function editPelanggan(id) {
-    db.ref('pelanggan/' + id).once('value').then(snapshot => {
-      const data = snapshot.val();
-      const nama = prompt("Nama:", data.nama);
-      const alamat = prompt("Alamat:", data.alamat);
-      const telepon = prompt("Telepon:", data.telepon);
-      const paket = prompt("Paket:", data.paket);
-      const harga = prompt("Harga:", data.harga);
-      if (nama && alamat && telepon && paket && harga) {
-        db.ref('pelanggan/' + id).update({ nama, alamat, telepon, paket, harga });
-        alert("Data berhasil diubah!");
-      }
-    });
-  }
-
-  function hapusPelanggan(id) {
-    if (confirm("Yakin ingin menghapus data ini?")) {
-      db.ref('pelanggan/' + id).remove();
-      alert("Data berhasil dihapus!");
-    }
-  }
-
-  function kirimNotifikasi(id) {
-    alert("🔔 Notifikasi terkirim ke pelanggan ID: " + id);
-  }
-
-  // Jalankan saat halaman siap
-  window.onload = function() {
-    tampilData();      // tampilkan tabel
-    importDariKML();   // sinkronkan data Google Earth -> Firebase
-  };
+  function bayar(id){ alert("Bayar ID: " + id); }
+  function edit(id){ alert("Edit ID: " + id); }
+  function hapus(id){ if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove(); }
+  function notif(id){ alert("Notifikasi ke ID: " + id); }
 </script>
 </body>
 </html>
