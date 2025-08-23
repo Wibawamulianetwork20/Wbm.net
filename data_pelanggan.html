@@ -227,17 +227,20 @@
       .catch(err => alert("❌ Gagal membaca pelanggan.xml: " + err));
   }
 
-  // 🗑️ Reset Database
-  function resetDatabase() {
-    if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
-      db.ref("pelanggan").remove()
-        .then(() => {
-          alert("✅ Semua data pelanggan sudah dihapus!");
-          location.reload();
-        })
-        .catch(err => alert("❌ Gagal reset: " + err));
-    }
+  // 🗑️ Reset Database (hapus semua data pelanggan)
+function resetDatabase() {
+  if (confirm("⚠️ Semua data pelanggan akan dihapus permanen.\nLanjutkan reset?")) {
+    db.ref("pelanggan").set(null)   // gunakan set(null) lebih aman daripada remove()
+      .then(() => {
+        alert("✅ Semua data pelanggan sudah dihapus!");
+        location.reload();
+      })
+      .catch(err => {
+        console.error("❌ Error reset:", err);
+        alert("❌ Gagal reset database: " + err.message);
+      });
   }
+}
 
   // 🗑️ Hapus duplikat
   function hapusDuplikat() {
