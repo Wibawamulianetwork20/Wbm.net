@@ -26,9 +26,14 @@
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <span><i class="fas fa-users"></i> Data Pelanggan</span>
-      <button class="btn btn-light btn-sm" onclick="importDariXML()">
-        <i class="fas fa-file-import"></i> Import pelanggan.xml
-      </button>
+      <div>
+        <button class="btn btn-light btn-sm" onclick="importDariXML()">
+          <i class="fas fa-file-import"></i> Import pelanggan.xml
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="hapusDuplikat()">
+          <i class="fas fa-clone"></i> Hapus Duplikat
+        </button>
+      </div>
     </div>
     <div class="card-body">
       <table id="tabelPelanggan" class="display table table-striped w-100">
@@ -63,7 +68,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
 <script>
-  // Konfigurasi Firebase
+  // 🔧 Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
     authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -77,8 +82,8 @@
   const db = app.database();
 
   let table;
-  let lastKey = null; // key terakhir untuk pagination
-  const limit = 50;   // jumlah data per load
+  let lastKey = null;
+  const limit = 50;
   let loading = false;
 
   $(document).ready(() => {
@@ -89,12 +94,11 @@
       destroy: true
     });
 
-    // Load dari cache dulu
+    // Load dari cache
     const cache = localStorage.getItem("pelangganCache");
     if (cache) {
-      const data = JSON.parse(cache);
-      renderTable(data);
-      console.log("✅ Data dari cache ditampilkan");
+      renderTable(JSON.parse(cache));
+      console.log("✅ Data cache ditampilkan");
     }
 
     // Load pertama dari Firebase
@@ -108,15 +112,13 @@
     });
   });
 
-  // Fungsi load pelanggan batch
+  // 🔄 Load pelanggan batch
   function loadPelanggan() {
     loading = true;
     document.getElementById("status").textContent = "⏳ Memuat data...";
 
     let query = db.ref('pelanggan').orderByKey().limitToFirst(limit);
-    if (lastKey) {
-      query = db.ref('pelanggan').orderByKey().startAfter(lastKey).limitToFirst(limit);
-    }
+    if (lastKey) query = db.ref('pelanggan').orderByKey().startAfter(lastKey).limitToFirst(limit);
 
     query.once('value', snapshot => {
       const data = [];
@@ -124,9 +126,9 @@
         data.push({ id: child.key, ...child.val() });
         lastKey = child.key;
       });
+
       if (data.length > 0) {
         renderTable(data, true);
-        // Simpan cache
         const existing = JSON.parse(localStorage.getItem("pelangganCache") || "[]");
         localStorage.setItem("pelangganCache", JSON.stringify(existing.concat(data)));
         document.getElementById("status").textContent = "Scroll ke bawah untuk memuat lebih banyak...";
@@ -137,7 +139,7 @@
     });
   }
 
-  // Render data ke DataTables
+  // 🖼️ Render DataTables
   function renderTable(data, append=false) {
     if (!append) table.clear();
     let no = table.data().count() + 1;
@@ -160,7 +162,7 @@
     table.draw(false);
   }
 
-  // Import pelanggan dari XML
+  // 📥 Import pelanggan dari XML
   function importDariXML() {
     fetch("Wbmnet.xml")
       .then(res => res.text())
@@ -188,6 +190,7 @@
         });
 
         setTimeout(() => {
+          hapusDuplikat(true); // 🔥 otomatis hapus duplikat setelah import
           alert(`Import selesai!\nDitambahkan: ${baru}\nSudah ada: ${sudah}`);
           location.reload();
         }, 1500);
@@ -195,7 +198,37 @@
       .catch(err => alert("Gagal membaca pelanggan.xml: " + err));
   }
 
-  // Aksi tombol
+  // 🗑️ Hapus data duplikat (manual / otomatis)
+  function hapusDuplikat(silent=false) {
+    db.ref("pelanggan").once("value", snapshot => {
+      if (!snapshot.exists()) {
+        if (!silent) alert("Tidak ada data pelanggan.");
+        return;
+      }
+      const data = snapshot.val();
+      const seen = {};
+      const hapusList = [];
+
+      for (let id in data) {
+        let nama = (data[id].nama || "").trim().toLowerCase();
+        if (seen[nama]) {
+          hapusList.push(id);
+        } else {
+          seen[nama] = true;
+        }
+      }
+
+      if (hapusList.length === 0) {
+        if (!silent) alert("✅ Tidak ada data duplikat.");
+        return;
+      }
+
+      hapusList.forEach(id => db.ref("pelanggan/"+id).remove());
+      if (!silent) alert(`✅ ${hapusList.length} duplikat dihapus!`);
+    });
+  }
+
+  // 🔘 Aksi tombol
   function bayar(id){ alert("Bayar ID: " + id); }
   function edit(id){ alert("Edit ID: " + id); }
   function hapus(id){ if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove(); }
