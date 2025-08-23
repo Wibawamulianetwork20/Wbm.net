@@ -56,7 +56,7 @@
         </thead>
         <tbody></tbody>
       </table>
-      <p id="status" class="text-center text-muted mt-2">Scroll ke bawah untuk memuat lebih banyak...</p>
+      <p id="status" class="text-center text-muted mt-2">Menunggu data pelanggan...</p>
     </div>
   </div>
 </div>
@@ -88,9 +88,6 @@
   const db = app.database();
 
   let table;
-  let lastKey = null;
-  const limit = 50;
-  let loading = false;
 
   $(document).ready(() => {
     table = $('#tabelPelanggan').DataTable({
@@ -99,91 +96,64 @@
       searching: true,
       destroy: true
     });
-    loadPelanggan();
-    window.addEventListener("scroll", () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-        if (!loading) loadPelanggan();
-      }
-    });
+    // Saat halaman load, sinkron dari JSON
+    importDariJSON();
   });
 
-  // 🔄 Load batch pelanggan
-  function loadPelanggan() {
-    loading = true;
-    document.getElementById("status").textContent = "⏳ Memuat data...";
-
-    let query = db.ref('pelanggan').orderByKey().limitToFirst(limit);
-    if (lastKey) query = db.ref('pelanggan').orderByKey().startAfter(lastKey).limitToFirst(limit);
-
-    query.once('value').then(snapshot => {
-      const data = [];
-      snapshot.forEach(child => {
-        data.push({ id: child.key, ...child.val() });
-        lastKey = child.key;
-      });
-
-      if (data.length > 0) {
-        renderTable(data, true);
-        document.getElementById("status").textContent = "Scroll ke bawah untuk memuat lebih banyak...";
-      } else {
-        document.getElementById("status").textContent = "✅ Semua data sudah dimuat.";
-      }
-      loading = false;
-    });
-  }
-
-  // 🖼️ Render DataTables
-  function renderTable(data, append=false) {
-    if (!append) table.clear();
-    let no = table.data().count() + 1;
-    data.forEach(item => {
-      table.row.add([
-        no++,
-        item.nama,
-        item.alamat || "-",
-        item.telepon || "-",
-        item.paket || "-",
-        "Rp" + (item.harga || 0),
-        `
-        <button class="aksi-btn bayar" onclick="bayar('${item.id}')"><i class="fas fa-money-bill"></i></button>
-        <button class="aksi-btn edit" onclick="edit('${item.id}')"><i class="fas fa-edit"></i></button>
-        <button class="aksi-btn hapus" onclick="hapus('${item.id}')"><i class="fas fa-trash"></i></button>
-        <button class="aksi-btn notif" onclick="notif('${item.id}')"><i class="fas fa-bell"></i></button>
-        `
-      ]);
-    });
-    table.draw(false);
-  }
-
-function importDariJSON() {
-  fetch("pelanggan.json")
-    .then(res => res.json())
-    .then(jsonData => {
-      let formatted = {};
-
-      if (Array.isArray(jsonData)) {
-        jsonData.forEach((item, i) => {
-          const key = (item.nama || "pelanggan_"+i).toLowerCase().replace(/\s+/g, "_");
-          formatted[key] = item;
-        });
-      } else {
-        formatted = jsonData;
-      }
-
-      // Simpan hasil formatted ke Firebase
-      db.ref("pelanggan").set(formatted)
-        .then(() => {
+  // 🚀 Sinkronisasi otomatis dari pelanggan.json
+  function importDariJSON() {
+    fetch("pelanggan.json")
+      .then(res => res.json())
+      .then(jsonData => {
+        let formatted = {};
+        if (Array.isArray(jsonData)) {
+          jsonData.forEach((item, i) => {
+            const key = (item.nama || "pelanggan_"+i).toLowerCase().replace(/\s+/g, "_");
+            formatted[key] = item;
+          });
+        } else {
+          formatted = jsonData;
+        }
+        // Simpan ke Firebase lalu tampilkan di tabel
+        db.ref("pelanggan").set(formatted).then(() => {
           console.log("✅ Sinkron JSON selesai");
-          // Panggil ulang load tabel
-          table.clear().draw();
-          lastKey = null;
-          loadPelanggan();
+          tampilkanTabel();
         });
-    })
-    .catch(err => console.warn("⚠️ Tidak ada pelanggan.json atau gagal baca:", err));
-}
+      })
+      .catch(err => {
+        console.warn("⚠️ Tidak ada pelanggan.json atau gagal baca:", err);
+        tampilkanTabel(); // tetap load dari Firebase
+      });
+  }
 
-  // 📥 Import pelanggan.xml (tambahkan baru)
+  // 🖼️ Ambil & tampilkan data pelanggan
+  function tampilkanTabel() {
+    db.ref("pelanggan").once("value").then(snapshot => {
+      table.clear();
+      let no = 1;
+      snapshot.forEach(child => {
+        const d = child.val();
+        table.row.add([
+          no++,
+          d.nama || "-",
+          d.alamat || "-",
+          d.telepon || "-",
+          d.paket || "-",
+          "Rp" + (d.harga || 0),
+          `
+          <button class="aksi-btn bayar" onclick="bayar('${child.key}')"><i class="fas fa-money-bill"></i></button>
+          <button class="aksi-btn edit" onclick="edit('${child.key}')"><i class="fas fa-edit"></i></button>
+          <button class="aksi-btn hapus" onclick="hapus('${child.key}')"><i class="fas fa-trash"></i></button>
+          <button class="aksi-btn notif" onclick="notif('${child.key}')"><i class="fas fa-bell"></i></button>
+          `
+        ]);
+      });
+      table.draw(false);
+      document.getElementById("status").textContent = "✅ Data pelanggan dimuat.";
+    });
+  }
+
+  // 📥 Import pelanggan.xml → tambahkan baru saja
   function importDariXML() {
     fetch("Wbmnet.xml")
       .then(res => res.text())
@@ -191,18 +161,14 @@ function importDariJSON() {
         const parser = new DOMParser();
         const kml = parser.parseFromString(kmltext, "text/xml");
         const geojson = toGeoJSON.kml(kml);
-
         db.ref("pelanggan").once("value").then(snapshot => {
           const dataLama = snapshot.val() || {};
           const namaSet = new Set(
             Object.values(dataLama).map(d => (d.nama || "").toLowerCase())
           );
-
           let totalBaru = 0;
-          geojson.features.forEach(f => {
-            const nama = f.properties.name || "Tanpa Nama";
-            const coords = f.geometry.coordinates;
-
+          geojson.features.forEach((f, i) => {
+            const nama = f.properties.name || "Tanpa Nama " + i;
             if (!namaSet.has(nama.toLowerCase())) {
               const key = nama.toLowerCase().replace(/\s+/g, "_");
               db.ref("pelanggan/" + key).set({
@@ -210,16 +176,13 @@ function importDariJSON() {
                 alamat: "-",
                 telepon: "-",
                 paket: "-",
-                harga: 0,
-                longitude: coords[0],
-                latitude: coords[1]
+                harga: 0
               });
               totalBaru++;
             }
           });
-
           alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
-          location.reload();
+          tampilkanTabel();
         });
       })
       .catch(err => alert("❌ Gagal membaca pelanggan.xml: " + err));
@@ -228,16 +191,14 @@ function importDariJSON() {
   // 🗑️ Reset Database
   function resetDatabase() {
     if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
-      db.ref("pelanggan").set(null)
-        .then(() => {
-          alert("✅ Semua data pelanggan sudah dihapus!");
-          location.reload();
-        })
-        .catch(err => alert("❌ Gagal reset: " + err.message));
+      db.ref("pelanggan").set(null).then(() => {
+        alert("✅ Semua data pelanggan sudah dihapus!");
+        tampilkanTabel();
+      });
     }
   }
 
-  // 🗑️ Hapus duplikat
+  // 🗑️ Hapus duplikat berdasarkan nama
   function hapusDuplikat() {
     db.ref("pelanggan").once("value", snapshot => {
       if (!snapshot.exists()) {
@@ -247,42 +208,32 @@ function importDariJSON() {
       const data = snapshot.val();
       const seen = {};
       const hapusList = [];
-
       for (let id in data) {
         let nama = (data[id].nama || "").trim().toLowerCase();
         if (seen[nama]) hapusList.push(id);
         else seen[nama] = true;
       }
-
       hapusList.forEach(id => db.ref("pelanggan/"+id).remove());
       alert(`✅ ${hapusList.length} duplikat dihapus!`);
+      tampilkanTabel();
     });
   }
 
   // 🔘 Aksi tombol dummy
   function bayar(id){ alert("Bayar ID: " + id); }
   function edit(id){ alert("Edit ID: " + id); }
-  function hapus(id){ if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove(); }
+  function hapus(id){ if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove().then(tampilkanTabel); }
   function notif(id){ alert("Notifikasi ke ID: " + id); }
 
   // 🧹 Clear Cache & Service Worker
   function clearPWACache() {
     if (!confirm("⚠️ Hapus semua cache & service worker PWA?")) return;
-
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => reg.unregister());
-        console.log("✅ Semua service worker dihapus");
-      });
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(reg => reg.unregister()));
     }
-    caches.keys().then(names => {
-      for (let name of names) caches.delete(name);
-      console.log("✅ Cache PWA dibersihkan");
-    });
-
-    localStorage.clear();
-    sessionStorage.clear();
-    alert("✅ Cache & Service Worker PWA sudah dibersihkan.\nSilakan reload halaman.");
+    caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    localStorage.clear(); sessionStorage.clear();
+    alert("✅ Cache & Service Worker PWA dibersihkan.\nReload halaman.");
   }
 </script>
 </body>
