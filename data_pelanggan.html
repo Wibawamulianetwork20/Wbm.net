@@ -86,6 +86,71 @@
   const app = firebase.initializeApp(firebaseConfig);
   const db = app.database();
 
+  // ===== Variabel lokal =====
+let dataPelanggan = [];
+let filteredData = [];
+const BATCH_SIZE = 100;
+let startIndex = 0;
+
+// ===== Fetch data dari Firebase sekali =====
+function fetchData() {
+  db.ref("pelanggan").once("value").then(snapshot => {
+    const obj = snapshot.val() || {};
+    dataPelanggan = Object.keys(obj).map(key => obj[key]);
+    filteredData = [...dataPelanggan];
+    startIndex = 0;
+    document.getElementById("tbodyPelanggan").innerHTML = "";
+    renderBatch();
+  });
+}
+
+// ===== Render batch =====
+function renderBatch() {
+  const tbody = document.getElementById("tbodyPelanggan");
+  const fragment = document.createDocumentFragment();
+  const end = Math.min(startIndex + BATCH_SIZE, filteredData.length);
+
+  for (let i = startIndex; i < end; i++) {
+    const p = filteredData[i];
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${p.nama}</td>
+      <td>${p.alamat}</td>
+      <td>${p.telepon}</td>
+      <td>${p.paket}</td>
+      <td>${p.harga}</td>
+    `;
+    fragment.appendChild(tr);
+  }
+
+  tbody.appendChild(fragment);
+  startIndex = end;
+}
+
+// ===== Scroll Event untuk infinite scroll =====
+window.addEventListener("scroll", () => {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
+    if (startIndex < filteredData.length) renderBatch();
+  }
+});
+
+// ===== Search/filter client side =====
+document.getElementById("search").addEventListener("input", function() {
+  const keyword = this.value.toLowerCase();
+  filteredData = dataPelanggan.filter(p => 
+    (p.nama || "").toLowerCase().includes(keyword) ||
+    (p.alamat || "").toLowerCase().includes(keyword) ||
+    (p.paket || "").toLowerCase().includes(keyword)
+  );
+  startIndex = 0;
+  document.getElementById("tbodyPelanggan").innerHTML = "";
+  renderBatch();
+});
+
+// ===== Fetch awal =====
+fetchData();
+
   let table;
 
   $(document).ready(() => {
