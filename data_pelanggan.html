@@ -94,17 +94,11 @@
       destroy: true
     });
 
-    // Load dari cache
     const cache = localStorage.getItem("pelangganCache");
-    if (cache) {
-      renderTable(JSON.parse(cache));
-      console.log("✅ Data cache ditampilkan");
-    }
+    if (cache) renderTable(JSON.parse(cache));
 
-    // Load pertama dari Firebase
     loadPelanggan();
 
-    // Infinite scroll
     window.addEventListener("scroll", () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
         if (!loading) loadPelanggan();
@@ -112,7 +106,7 @@
     });
   });
 
-  // 🔄 Load pelanggan batch
+  // 🔄 Load batch pelanggan
   function loadPelanggan() {
     loading = true;
     document.getElementById("status").textContent = "⏳ Memuat data...";
@@ -162,8 +156,10 @@
     table.draw(false);
   }
 
-  // 📥 Import pelanggan dari XML
+  // 📥 Import pelanggan.xml (reset & replace by name)
   function importDariXML() {
+    if (!confirm("⚠️ Semua data pelanggan lama akan dihapus.\nLanjutkan import dari pelanggan.xml?")) return;
+
     fetch("Wbmnet.xml")
       .then(res => res.text())
       .then(kmltext => {
@@ -171,34 +167,36 @@
         const kml = parser.parseFromString(kmltext, "text/xml");
         const geojson = toGeoJSON.kml(kml);
 
-        let baru = 0, sudah = 0;
-        geojson.features.forEach(f => {
-          const nama = f.properties.name || "Tanpa Nama";
-          const coords = f.geometry.coordinates;
+        // 🔥 Hapus semua data dulu
+        db.ref("pelanggan").remove().then(() => {
+          let total = 0;
+          geojson.features.forEach(f => {
+            const nama = f.properties.name || "Tanpa Nama";
+            const coords = f.geometry.coordinates;
+            const key = nama.toLowerCase().replace(/\s+/g, "_");
 
-          db.ref("pelanggan").orderByChild("nama").equalTo(nama).once("value", snap => {
-            if (!snap.exists()) {
-              db.ref("pelanggan").push({
-                nama, alamat: "-", telepon: "-", paket: "-", harga: 0,
-                longitude: coords[0], latitude: coords[1]
-              });
-              baru++;
-            } else {
-              sudah++;
-            }
+            db.ref("pelanggan/" + key).set({
+              nama,
+              alamat: "-",
+              telepon: "-",
+              paket: "-",
+              harga: 0,
+              longitude: coords[0],
+              latitude: coords[1]
+            });
+            total++;
           });
-        });
 
-        setTimeout(() => {
-          hapusDuplikat(true); // 🔥 otomatis hapus duplikat setelah import
-          alert(`Import selesai!\nDitambahkan: ${baru}\nSudah ada: ${sudah}`);
-          location.reload();
-        }, 1500);
+          setTimeout(() => {
+            alert(`✅ Import selesai!\nTotal data baru: ${total}`);
+            location.reload();
+          }, 2000);
+        });
       })
       .catch(err => alert("Gagal membaca pelanggan.xml: " + err));
   }
 
-  // 🗑️ Hapus data duplikat (manual / otomatis)
+  // 🗑️ Hapus duplikat manual
   function hapusDuplikat(silent=false) {
     db.ref("pelanggan").once("value", snapshot => {
       if (!snapshot.exists()) {
@@ -211,16 +209,8 @@
 
       for (let id in data) {
         let nama = (data[id].nama || "").trim().toLowerCase();
-        if (seen[nama]) {
-          hapusList.push(id);
-        } else {
-          seen[nama] = true;
-        }
-      }
-
-      if (hapusList.length === 0) {
-        if (!silent) alert("✅ Tidak ada data duplikat.");
-        return;
+        if (seen[nama]) hapusList.push(id);
+        else seen[nama] = true;
       }
 
       hapusList.forEach(id => db.ref("pelanggan/"+id).remove());
