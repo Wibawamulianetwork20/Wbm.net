@@ -192,11 +192,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/scrollreveal"></script>
   <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('serviceworker.js')
-      .then(() => console.log('Service Worker terdaftar!'))
-      .catch(err => console.error('Gagal daftar SW:', err));
-  }
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(() => console.log('✅ Service Worker registered'))
+    .catch(err => console.error('❌ SW registration failed:', err));
+}
 </script>
 <script>
   const ads = document.querySelectorAll('.ad-img');
