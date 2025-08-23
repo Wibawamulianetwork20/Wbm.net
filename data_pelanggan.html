@@ -27,9 +27,6 @@
     <div class="card-header d-flex justify-content-between align-items-center">
       <span><i class="fas fa-users"></i> Data Pelanggan</span>
       <div>
-        <button class="btn btn-success btn-sm" onclick="exportJSON()">
-          <i class="fas fa-download"></i> Export JSON
-        </button>
         <button class="btn btn-primary btn-sm" onclick="importDariXML()">
           <i class="fas fa-file-import"></i> Import XML (tambahkan baru)
         </button>
@@ -158,27 +155,35 @@
     table.draw(false);
   }
 
-  // 📤 Export JSON
-  function exportJSON() {
-    db.ref("pelanggan").once("value").then(snapshot => {
-      if (!snapshot.exists()) {
-        alert("❌ Tidak ada data untuk diekspor.");
-        return;
-      }
-      const data = snapshot.val();
-      const jsonStr = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
+  // 🚀 Import otomatis dari pelanggan.json
+  function importDariJSON() {
+    fetch("pelanggan.json")
+      .then(res => res.json())
+      .then(jsonData => {
+        db.ref("pelanggan").once("value").then(snapshot => {
+          const dataLama = snapshot.val() || {};
+          const namaSet = new Set(
+            Object.values(dataLama).map(d => (d.nama || "").toLowerCase())
+          );
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "pelanggan.json";
-      a.click();
-      URL.revokeObjectURL(url);
+          let totalBaru = 0;
+          for (let id in jsonData) {
+            const pelanggan = jsonData[id];
+            const nama = pelanggan.nama || "Tanpa Nama";
 
-      alert("✅ Data pelanggan berhasil diekspor!");
-    });
+            if (!namaSet.has(nama.toLowerCase())) {
+              const key = nama.toLowerCase().replace(/\s+/g, "_");
+              db.ref("pelanggan/" + key).set(pelanggan);
+              totalBaru++;
+            }
+          }
+
+          console.log(`✅ Import JSON selesai, tambahan baru: ${totalBaru}`);
+        });
+      })
+      .catch(err => console.warn("⚠️ Tidak ada pelanggan.json atau gagal baca:", err));
   }
+  window.addEventListener("load", importDariJSON);
 
   // 📥 Import pelanggan.xml (tambahkan baru)
   function importDariXML() {
@@ -215,7 +220,7 @@
             }
           });
 
-          alert(`✅ Import selesai! Tambahan baru: ${totalBaru}`);
+          alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
           location.reload();
         });
       })
