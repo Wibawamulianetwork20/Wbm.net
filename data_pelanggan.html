@@ -155,28 +155,33 @@
     table.draw(false);
   }
 
-// 🚀 Import otomatis dari pelanggan.json (sinkron penuh tanpa reload)
 function importDariJSON() {
   fetch("pelanggan.json")
     .then(res => res.json())
     .then(jsonData => {
-      // Kosongkan node pelanggan dulu
-      db.ref("pelanggan").set(null).then(() => {
-        // Isi ulang dengan data dari JSON
-        db.ref("pelanggan").set(jsonData)
-          .then(() => {
-            console.log("✅ Sinkronisasi JSON selesai");
-            // 🔥 Muat ulang tabel tanpa reload halaman
-            table.clear().draw();
-            lastKey = null;
-            loadPelanggan();
-          })
-          .catch(err => alert("❌ Gagal simpan ke Firebase: " + err.message));
-      });
+      let formatted = {};
+
+      if (Array.isArray(jsonData)) {
+        jsonData.forEach((item, i) => {
+          const key = (item.nama || "pelanggan_"+i).toLowerCase().replace(/\s+/g, "_");
+          formatted[key] = item;
+        });
+      } else {
+        formatted = jsonData;
+      }
+
+      // Simpan hasil formatted ke Firebase
+      db.ref("pelanggan").set(formatted)
+        .then(() => {
+          console.log("✅ Sinkron JSON selesai");
+          // Panggil ulang load tabel
+          table.clear().draw();
+          lastKey = null;
+          loadPelanggan();
+        });
     })
     .catch(err => console.warn("⚠️ Tidak ada pelanggan.json atau gagal baca:", err));
 }
-window.addEventListener("load", importDariJSON);
 
   // 📥 Import pelanggan.xml (tambahkan baru)
   function importDariXML() {
