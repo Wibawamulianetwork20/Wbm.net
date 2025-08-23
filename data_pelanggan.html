@@ -86,6 +86,7 @@
   const limit = 50;
   let loading = false;
 
+  // Jalankan saat halaman siap
   $(document).ready(() => {
     table = $('#tabelPelanggan').DataTable({
       pageLength: 25,
@@ -156,7 +157,7 @@
     table.draw(false);
   }
 
-  // 📥 Import pelanggan.xml (reset & replace by name)
+  // 📥 Import pelanggan.xml (reset & replace by name) → hanya saat tombol diklik
   function importDariXML() {
     if (!confirm("⚠️ Semua data pelanggan lama akan dihapus.\nLanjutkan import dari pelanggan.xml?")) return;
 
