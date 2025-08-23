@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data Pelanggan - Wibawamulia.Network</title>
+  <title>Data Pelanggan - eBilling</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap & DataTables -->
@@ -155,30 +155,20 @@
     table.draw(false);
   }
 
-  // 🚀 Import otomatis dari pelanggan.json
+  // 🚀 Import otomatis dari pelanggan.json (sinkron penuh)
   function importDariJSON() {
     fetch("pelanggan.json")
       .then(res => res.json())
       .then(jsonData => {
-        db.ref("pelanggan").once("value").then(snapshot => {
-          const dataLama = snapshot.val() || {};
-          const namaSet = new Set(
-            Object.values(dataLama).map(d => (d.nama || "").toLowerCase())
-          );
-
-          let totalBaru = 0;
-          for (let id in jsonData) {
-            const pelanggan = jsonData[id];
-            const nama = pelanggan.nama || "Tanpa Nama";
-
-            if (!namaSet.has(nama.toLowerCase())) {
-              const key = nama.toLowerCase().replace(/\s+/g, "_");
-              db.ref("pelanggan/" + key).set(pelanggan);
-              totalBaru++;
-            }
-          }
-
-          console.log(`✅ Import JSON selesai, tambahan baru: ${totalBaru}`);
+        // Kosongkan node pelanggan dulu
+        db.ref("pelanggan").set(null).then(() => {
+          // Isi ulang dengan data dari JSON
+          db.ref("pelanggan").set(jsonData)
+            .then(() => {
+              console.log("✅ Sinkronisasi JSON selesai");
+              location.reload();
+            })
+            .catch(err => alert("❌ Gagal simpan ke Firebase: " + err.message));
         });
       })
       .catch(err => console.warn("⚠️ Tidak ada pelanggan.json atau gagal baca:", err));
@@ -227,20 +217,17 @@
       .catch(err => alert("❌ Gagal membaca pelanggan.xml: " + err));
   }
 
-  // 🗑️ Reset Database (hapus semua data pelanggan)
-function resetDatabase() {
-  if (confirm("⚠️ Semua data pelanggan akan dihapus permanen.\nLanjutkan reset?")) {
-    db.ref("pelanggan").set(null)   // gunakan set(null) lebih aman daripada remove()
-      .then(() => {
-        alert("✅ Semua data pelanggan sudah dihapus!");
-        location.reload();
-      })
-      .catch(err => {
-        console.error("❌ Error reset:", err);
-        alert("❌ Gagal reset database: " + err.message);
-      });
+  // 🗑️ Reset Database
+  function resetDatabase() {
+    if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
+      db.ref("pelanggan").set(null)
+        .then(() => {
+          alert("✅ Semua data pelanggan sudah dihapus!");
+          location.reload();
+        })
+        .catch(err => alert("❌ Gagal reset: " + err.message));
+    }
   }
-}
 
   // 🗑️ Hapus duplikat
   function hapusDuplikat() {
