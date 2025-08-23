@@ -99,8 +99,11 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
+  <!-- togeojson untuk baca file KML -->
+  <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+
 <script>
-  // Firebase B
+  // Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
     authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -113,7 +116,7 @@
   const app = firebase.initializeApp(firebaseConfig);
   const db = app.database();
 
-  // Tampilkan data
+  // Fungsi tampilkan data tabel
   function tampilData() {
     const tbody = document.querySelector('#tabelPelanggan tbody');
     db.ref('pelanggan').on('value', snapshot => {
@@ -128,8 +131,8 @@
             <td>${data.nama}</td>
             <td>${data.alamat || '-'}</td>
             <td>${data.telepon || '-'}</td>
-            <td>${data.paket}</td>
-            <td>Rp${data.harga}</td>
+            <td>${data.paket || '-'}</td>
+            <td>Rp${data.harga || 0}</td>
             <td>
               <button class="aksi-btn bayar" onclick="bayarPelanggan('${id}')"><i class="fas fa-money-bill-wave"></i></button>
               <button class="aksi-btn edit" onclick="editPelanggan('${id}')"><i class="fas fa-edit"></i></button>
@@ -145,6 +148,39 @@
       }
       $('#tabelPelanggan').DataTable();
     });
+  }
+
+  // Import pelanggan dari Google Earth (KML) ke Firebase
+  function importDariKML() {
+    fetch("Wbmnet.kml")
+      .then(res => res.text())
+      .then(kmltext => {
+        const parser = new DOMParser();
+        const kml = parser.parseFromString(kmltext, "text/xml");
+        const geojson = toGeoJSON.kml(kml);
+
+        geojson.features.forEach(f => {
+          const nama = f.properties.name || "Tanpa Nama";
+
+          // Cek apakah sudah ada di Firebase (berdasarkan nama)
+          db.ref("pelanggan").orderByChild("nama").equalTo(nama).once("value", snapshot => {
+            if (!snapshot.exists()) {
+              // Jika belum ada, tambahkan ke Firebase
+              db.ref("pelanggan").push({
+                nama: nama,
+                alamat: "-",
+                telepon: "-",
+                paket: "-",
+                harga: 0
+              });
+              console.log("✅ Ditambahkan:", nama);
+            } else {
+              console.log("⚠️ Sudah ada:", nama);
+            }
+          });
+        });
+      })
+      .catch(err => console.error("Gagal membaca KML:", err));
   }
 
   // Aksi tombol
@@ -179,7 +215,10 @@
   }
 
   // Jalankan saat halaman siap
-  window.onload = tampilData;
+  window.onload = function() {
+    tampilData();      // tampilkan tabel
+    importDariKML();   // sinkronkan data Google Earth -> Firebase
+  };
 </script>
 </body>
 </html>
