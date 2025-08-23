@@ -27,11 +27,20 @@
     <div class="card-header d-flex justify-content-between align-items-center">
       <span><i class="fas fa-users"></i> Data Pelanggan</span>
       <div>
-        <button class="btn btn-light btn-sm" onclick="importDariXML()">
-          <i class="fas fa-file-import"></i> Import pelanggan.xml
+        <button class="btn btn-success btn-sm" onclick="exportJSON()">
+          <i class="fas fa-download"></i> Export JSON
         </button>
-        <button class="btn btn-danger btn-sm" onclick="hapusDuplikat()">
+        <button class="btn btn-primary btn-sm" onclick="importDariXML()">
+          <i class="fas fa-file-import"></i> Import XML (tambahkan baru)
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="resetDatabase()">
+          <i class="fas fa-trash"></i> Reset Database
+        </button>
+        <button class="btn btn-warning btn-sm" onclick="hapusDuplikat()">
           <i class="fas fa-clone"></i> Hapus Duplikat
+        </button>
+        <button class="btn btn-dark btn-sm" onclick="clearPWACache()">
+          <i class="fas fa-broom"></i> Clear Cache PWA
         </button>
       </div>
     </div>
@@ -86,7 +95,6 @@
   const limit = 50;
   let loading = false;
 
-  // Jalankan saat halaman siap
   $(document).ready(() => {
     table = $('#tabelPelanggan').DataTable({
       pageLength: 25,
@@ -94,12 +102,7 @@
       searching: true,
       destroy: true
     });
-
-    const cache = localStorage.getItem("pelangganCache");
-    if (cache) renderTable(JSON.parse(cache));
-
     loadPelanggan();
-
     window.addEventListener("scroll", () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
         if (!loading) loadPelanggan();
@@ -115,7 +118,7 @@
     let query = db.ref('pelanggan').orderByKey().limitToFirst(limit);
     if (lastKey) query = db.ref('pelanggan').orderByKey().startAfter(lastKey).limitToFirst(limit);
 
-    query.once('value', snapshot => {
+    query.once('value').then(snapshot => {
       const data = [];
       snapshot.forEach(child => {
         data.push({ id: child.key, ...child.val() });
@@ -124,8 +127,6 @@
 
       if (data.length > 0) {
         renderTable(data, true);
-        const existing = JSON.parse(localStorage.getItem("pelangganCache") || "[]");
-        localStorage.setItem("pelangganCache", JSON.stringify(existing.concat(data)));
         document.getElementById("status").textContent = "Scroll ke bawah untuk memuat lebih banyak...";
       } else {
         document.getElementById("status").textContent = "✅ Semua data sudah dimuat.";
@@ -157,10 +158,30 @@
     table.draw(false);
   }
 
-  // 📥 Import pelanggan.xml (reset & replace by name) → hanya saat tombol diklik
-  function importDariXML() {
-    if (!confirm("⚠️ Semua data pelanggan lama akan dihapus.\nLanjutkan import dari pelanggan.xml?")) return;
+  // 📤 Export JSON
+  function exportJSON() {
+    db.ref("pelanggan").once("value").then(snapshot => {
+      if (!snapshot.exists()) {
+        alert("❌ Tidak ada data untuk diekspor.");
+        return;
+      }
+      const data = snapshot.val();
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
 
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pelanggan.json";
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert("✅ Data pelanggan berhasil diekspor!");
+    });
+  }
+
+  // 📥 Import pelanggan.xml (tambahkan baru)
+  function importDariXML() {
     fetch("Wbmnet.xml")
       .then(res => res.text())
       .then(kmltext => {
@@ -168,40 +189,56 @@
         const kml = parser.parseFromString(kmltext, "text/xml");
         const geojson = toGeoJSON.kml(kml);
 
-        // 🔥 Hapus semua data dulu
-        db.ref("pelanggan").remove().then(() => {
-          let total = 0;
+        db.ref("pelanggan").once("value").then(snapshot => {
+          const dataLama = snapshot.val() || {};
+          const namaSet = new Set(
+            Object.values(dataLama).map(d => (d.nama || "").toLowerCase())
+          );
+
+          let totalBaru = 0;
           geojson.features.forEach(f => {
             const nama = f.properties.name || "Tanpa Nama";
             const coords = f.geometry.coordinates;
-            const key = nama.toLowerCase().replace(/\s+/g, "_");
 
-            db.ref("pelanggan/" + key).set({
-              nama,
-              alamat: "-",
-              telepon: "-",
-              paket: "-",
-              harga: 0,
-              longitude: coords[0],
-              latitude: coords[1]
-            });
-            total++;
+            if (!namaSet.has(nama.toLowerCase())) {
+              const key = nama.toLowerCase().replace(/\s+/g, "_");
+              db.ref("pelanggan/" + key).set({
+                nama,
+                alamat: "-",
+                telepon: "-",
+                paket: "-",
+                harga: 0,
+                longitude: coords[0],
+                latitude: coords[1]
+              });
+              totalBaru++;
+            }
           });
 
-          setTimeout(() => {
-            alert(`✅ Import selesai!\nTotal data baru: ${total}`);
-            location.reload();
-          }, 2000);
+          alert(`✅ Import selesai! Tambahan baru: ${totalBaru}`);
+          location.reload();
         });
       })
-      .catch(err => alert("Gagal membaca pelanggan.xml: " + err));
+      .catch(err => alert("❌ Gagal membaca pelanggan.xml: " + err));
   }
 
-  // 🗑️ Hapus duplikat manual
-  function hapusDuplikat(silent=false) {
+  // 🗑️ Reset Database
+  function resetDatabase() {
+    if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
+      db.ref("pelanggan").remove()
+        .then(() => {
+          alert("✅ Semua data pelanggan sudah dihapus!");
+          location.reload();
+        })
+        .catch(err => alert("❌ Gagal reset: " + err));
+    }
+  }
+
+  // 🗑️ Hapus duplikat
+  function hapusDuplikat() {
     db.ref("pelanggan").once("value", snapshot => {
       if (!snapshot.exists()) {
-        if (!silent) alert("Tidak ada data pelanggan.");
+        alert("Tidak ada data pelanggan.");
         return;
       }
       const data = snapshot.val();
@@ -215,15 +252,35 @@
       }
 
       hapusList.forEach(id => db.ref("pelanggan/"+id).remove());
-      if (!silent) alert(`✅ ${hapusList.length} duplikat dihapus!`);
+      alert(`✅ ${hapusList.length} duplikat dihapus!`);
     });
   }
 
-  // 🔘 Aksi tombol
+  // 🔘 Aksi tombol dummy
   function bayar(id){ alert("Bayar ID: " + id); }
   function edit(id){ alert("Edit ID: " + id); }
   function hapus(id){ if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove(); }
   function notif(id){ alert("Notifikasi ke ID: " + id); }
+
+  // 🧹 Clear Cache & Service Worker
+  function clearPWACache() {
+    if (!confirm("⚠️ Hapus semua cache & service worker PWA?")) return;
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
+        console.log("✅ Semua service worker dihapus");
+      });
+    }
+    caches.keys().then(names => {
+      for (let name of names) caches.delete(name);
+      console.log("✅ Cache PWA dibersihkan");
+    });
+
+    localStorage.clear();
+    sessionStorage.clear();
+    alert("✅ Cache & Service Worker PWA sudah dibersihkan.\nSilakan reload halaman.");
+  }
 </script>
 </body>
 </html>
