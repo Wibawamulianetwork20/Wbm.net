@@ -152,36 +152,40 @@
 
   // Import pelanggan dari Google Earth (KML) ke Firebase
   function importDariKML() {
-    fetch("Wbmnet.kml")
-      .then(res => res.text())
-      .then(kmltext => {
-        const parser = new DOMParser();
-        const kml = parser.parseFromString(kmltext, "text/xml");
-        const geojson = toGeoJSON.kml(kml);
+  fetch("Wbmnet.xml") // sudah diubah dari .kml ke .xml
+    .then(res => res.text())
+    .then(kmltext => {
+      const parser = new DOMParser();
+      const kml = parser.parseFromString(kmltext, "text/xml");
+      const geojson = toGeoJSON.kml(kml);
 
-        geojson.features.forEach(f => {
-          const nama = f.properties.name || "Tanpa Nama";
+      geojson.features.forEach(f => {
+        const nama = f.properties.name || "Tanpa Nama";
+        const coords = f.geometry.coordinates; // [lon, lat, alt]
 
-          // Cek apakah sudah ada di Firebase (berdasarkan nama)
-          db.ref("pelanggan").orderByChild("nama").equalTo(nama).once("value", snapshot => {
-            if (!snapshot.exists()) {
-              // Jika belum ada, tambahkan ke Firebase
-              db.ref("pelanggan").push({
-                nama: nama,
-                alamat: "-",
-                telepon: "-",
-                paket: "-",
-                harga: 0
-              });
-              console.log("✅ Ditambahkan:", nama);
-            } else {
-              console.log("⚠️ Sudah ada:", nama);
-            }
-          });
+        db.ref("pelanggan").orderByChild("nama").equalTo(nama).once("value", snapshot => {
+          if (!snapshot.exists()) {
+            db.ref("pelanggan").push({
+              nama: nama,
+              alamat: "-",
+              telepon: "-",
+              paket: "-",
+              harga: 0,
+              longitude: coords[0],
+              latitude: coords[1]
+            });
+            console.log("✅ Ditambahkan:", nama);
+          }
         });
-      })
-      .catch(err => console.error("Gagal membaca KML:", err));
-  }
+      });
+
+      alert("Import pelanggan dari XML selesai ✅");
+    })
+    .catch(err => {
+      console.error("❌ Error import XML:", err);
+      alert("Gagal membaca pelanggan.xml");
+    });
+}
 
   // Aksi tombol
   function bayarPelanggan(id) {
