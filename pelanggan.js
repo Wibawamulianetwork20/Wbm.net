@@ -14,7 +14,7 @@ const db = app.database();
 // ========== Variabel tabel ==========
 let table;
 let lastKey = null;
-const limit = 50;
+const limit = 50; // ubah ke 200 kalau mau load semua sekaligus
 let loading = false;
 
 $(document).ready(() => {
