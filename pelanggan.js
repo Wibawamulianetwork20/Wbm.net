@@ -25,10 +25,10 @@ $(document).ready(() => {
     destroy: true
   });
 
-  // Saat load pertama → tampilkan data
+  // load awal
   tampilkanTabel();
 
-  // Tombol Import XML
+  // tombol import XML
   document.getElementById("btnImport").addEventListener("click", () => {
     const fileInput = document.getElementById("fileKML");
     if (!fileInput.files.length) return alert("Pilih file XML/KML terlebih dahulu!");
@@ -42,44 +42,48 @@ $(document).ready(() => {
 function importDariXML(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
 
-    // Ambil semua <Placemark>
-    const placemarks = xmlDoc.getElementsByTagName("Placemark");
+      // Ambil semua <Placemark>
+      const placemarks = xmlDoc.getElementsByTagName("Placemark");
+      console.log("Jumlah Placemark terbaca:", placemarks.length);
 
-    db.ref("pelanggan").once("value").then(snapshot => {
-      const dataLama = snapshot.val() || {};
-      const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
+      db.ref("pelanggan").once("value").then(snapshot => {
+        const dataLama = snapshot.val() || {};
+        const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
 
-      let totalBaru = 0;
+        let totalBaru = 0;
+        for (let i = 0; i < placemarks.length; i++) {
+          const nameTag = placemarks[i].getElementsByTagName("name")[0];
+          const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
 
-      for (let i = 0; i < placemarks.length; i++) {
-        const nameTag = placemarks[i].getElementsByTagName("name")[0];
-        const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
-
-        if (!namaSet.has(nama.toLowerCase())) {
-          const key = nama.toLowerCase().replace(/\s+/g, "_");
-          db.ref("pelanggan/" + key).set({
-            nama,
-            alamat: "-",   // bisa diisi dari XML kalau ada
-            telepon: "-",  // bisa diisi dari XML kalau ada
-            paket: "-",
-            harga: 0
-          });
-          totalBaru++;
+          if (!namaSet.has(nama.toLowerCase())) {
+            const key = nama.toLowerCase().replace(/\s+/g, "_");
+            db.ref("pelanggan/" + key).set({
+              nama,
+              alamat: "-",
+              telepon: "-",
+              paket: "-",
+              harga: 0
+            });
+            totalBaru++;
+          }
         }
-      }
 
-      alert(`✅ Import selesai! Tambahan baru: ${totalBaru}`);
-      tampilkanTabel(); // refresh tabel setelah import
-    });
+        alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
+        tampilkanTabel(); // refresh tabel
+      });
+    } catch (err) {
+      alert("❌ Gagal memproses file XML/KML: " + err.message);
+    }
   };
   reader.readAsText(file);
 }
 
 // ======================
-// 📊 Tampilkan tabel
+// 📊 Tampilkan tabel pelanggan
 // ======================
 function tampilkanTabel() {
   db.ref("pelanggan").once("value").then(snapshot => {
