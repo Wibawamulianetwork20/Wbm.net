@@ -142,6 +142,57 @@
     });
   });
 
+  // 🔹 Import XML / KML (khusus Wbmnet.xml format)
+  document.getElementById("btnImport").addEventListener("click", () => {
+    const fileInput = document.getElementById("fileKML");
+    if (!fileInput.files.length) return alert("Pilih file XML terlebih dahulu!");
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = e => {
+      let text = e.target.result.trim();
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, "application/xml");
+      const placemarks = xmlDoc.getElementsByTagName("Placemark");
+
+      if (placemarks.length === 0) return alert("❌ Tidak ada <Placemark> ditemukan!");
+
+      db.ref("pelanggan").once("value").then(snapshot => {
+        const dataLama = snapshot.val() || {};
+        const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
+        let totalBaru = 0, promises = [];
+
+        for (let i = 0; i < placemarks.length; i++) {
+          const p = placemarks[i];
+          const nama = (p.getElementsByTagName("name")[0]?.textContent || "").trim();
+
+          if (!nama) continue;
+
+          const alamat = "-";
+          const telepon = "-";
+          const paket = "-";
+          const harga = "0";
+
+          console.log("📌 Import data:", { nama, alamat, telepon, paket, harga });
+
+          if (!namaSet.has(nama.toLowerCase())) {
+            const newRef = db.ref("pelanggan").push();
+            promises.push(newRef.set({ nama, alamat, telepon, paket, harga }));
+            totalBaru++;
+          }
+        }
+
+        Promise.all(promises).then(() => {
+          alert(`✅ Import selesai! Tambahan baru: ${totalBaru}`);
+          table.ajax.reload();
+        });
+      });
+    };
+    reader.readAsText(file);
+  });
+
   // 🔹 Dark Mode
   const darkToggle = document.getElementById("darkToggle");
   if (localStorage.getItem("darkmode") === "true") {
@@ -175,6 +226,15 @@
     });
   } catch(e) {
     console.warn("FCM tidak aktif:", e.message);
+  }
+
+  // 🔹 Daftarkan Service Worker gabungan (PWA + FCM)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('✅ Service Worker terdaftar:', reg.scope))
+        .catch(err => console.error('❌ SW gagal:', err));
+    });
   }
 </script>
 </body>
