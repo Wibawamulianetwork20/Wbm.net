@@ -28,12 +28,15 @@
       <span><i class="fas fa-users"></i> Data Pelanggan</span>
       <div>
         <input type="file" id="fileKML" class="form-control mb-2" accept=".xml,.kml">
-        <button id="btnImport" class="btn btn-primary mb-3"><i class="fas fa-file-import"></i> Import XML/KML</button>
+        <button id="btnImport" class="btn btn-primary mb-3"><i class="fas fa-file-import"></i> Import KML/XML</button>
         <button class="btn btn-danger btn-sm" onclick="resetDatabase()">
-          <i class="fas fa-trash"></i> Reset DB
+          <i class="fas fa-trash"></i> Reset Database
         </button>
         <button class="btn btn-warning btn-sm" onclick="hapusDuplikat()">
           <i class="fas fa-clone"></i> Hapus Duplikat
+        </button>
+        <button class="btn btn-dark btn-sm" onclick="clearPWACache()">
+          <i class="fas fa-broom"></i> Clear Cache PWA
         </button>
       </div>
     </div>
@@ -65,12 +68,19 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-<!-- togeojson untuk XML/KML -->
-<script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+<!-- FontAwesome -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-<!-- File JS terpisah -->
+<!-- Script terpisah -->
 <script src="pelanggan.js"></script>
+
+<script>
+  // Hubungkan tombol Import ke fungsi importDariXML
+  document.getElementById("btnImport").addEventListener("click", () => {
+    const fileInput = document.getElementById("fileKML");
+    importDariXML(fileInput.files[0]);
+  });
+</script>
 
 </body>
 </html>
