@@ -14,7 +14,7 @@ const db = app.database();
 // ========== Variabel tabel ==========
 let table;
 let lastKey = null;
-const limit = 50; // ubah ke 200 kalau mau load semua sekaligus
+const limit = 50;
 let loading = false;
 
 $(document).ready(() => {
@@ -22,8 +22,15 @@ $(document).ready(() => {
     pageLength: 25,
     ordering: false,
     searching: true,
-    destroy: true
+    destroy: true,
+    columnDefs: [{
+      targets: 0, // Kolom pertama untuk nomor urut
+      render: function (data, type, row, meta) {
+        return meta.row + 1; // Nomor urut otomatis
+      }
+    }]
   });
+
   loadPelanggan();
 
   // Infinite scroll
@@ -62,10 +69,9 @@ function loadPelanggan() {
 // ========== Render DataTables ==========
 function renderTable(data, append=false) {
   if (!append) table.clear();
-  let no = table.data().count() + 1;
   data.forEach(item => {
     table.row.add([
-      no++,
+      "", // kolom nomor (akan diisi otomatis oleh DataTables)
       item.nama,
       item.alamat || "-",
       item.telepon || "-",
