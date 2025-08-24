@@ -12,10 +12,56 @@
   <style>
     body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     .card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
-    .card-header { background: #0d6efd; color: white; font-weight: 600; }
-    .aksi-btn { border: none; border-radius: 8px; padding: 5px 10px; margin: 2px; color: white; cursor: pointer; }
+
+    /* Header card */
+    .card-header {
+      background: linear-gradient(90deg,#0d6efd,#0dcaf0);
+      color: white;
+      font-weight: 600;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .card-header .btn,
+    .card-header input[type="file"] {
+      margin: 4px 2px;
+    }
+
+    /* Tabel */
+    #tabelPelanggan {
+      font-size: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #tabelPelanggan tbody tr:hover {
+      background: #f1f7ff;
+    }
+
+    /* Kolom harga */
+    #tabelPelanggan td:nth-child(5) {
+      font-weight: bold;
+      color: #198754;
+    }
+
+    /* Tombol aksi bulat */
+    .aksi-btn {
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin: 2px;
+      font-size: 14px;
+      color: #fff;
+      border: none;
+      transition: 0.2s;
+    }
+    .aksi-btn:hover { transform: scale(1.1); opacity: 0.9; }
     .aksi-btn.bayar { background: #28a745; }
-    .aksi-btn.edit { background: #ffc107; }
+    .aksi-btn.edit { background: #ffc107; color: #000; }
     .aksi-btn.hapus { background: #dc3545; }
     .aksi-btn.notif { background: #0dcaf0; }
   </style>
@@ -24,20 +70,14 @@
 
 <div class="container py-4">
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header">
       <span><i class="fas fa-users"></i> Data Pelanggan</span>
       <div>
-        <input type="file" id="fileKML" class="form-control mb-2">
-        <button id="btnImport" class="btn btn-primary mb-3"><i class="fas fa-file-import"></i> Import XML</button>
-        <button class="btn btn-danger btn-sm" onclick="resetDatabase()">
-          <i class="fas fa-trash"></i> Reset Database
-        </button>
-        <button class="btn btn-warning btn-sm" onclick="hapusDuplikat()">
-          <i class="fas fa-clone"></i> Hapus Duplikat
-        </button>
-        <button class="btn btn-dark btn-sm" onclick="clearPWACache()">
-          <i class="fas fa-broom"></i> Clear Cache PWA
-        </button>
+        <input type="file" id="fileKML" class="form-control d-inline-block" style="width:auto;">
+        <button id="btnImport" class="btn btn-light text-primary"><i class="fas fa-file-import"></i> Import XML</button>
+        <button class="btn btn-danger btn-sm" onclick="resetDatabase()"><i class="fas fa-trash"></i> Reset</button>
+        <button class="btn btn-warning btn-sm" onclick="hapusDuplikat()"><i class="fas fa-clone"></i> Duplikat</button>
+        <button class="btn btn-dark btn-sm" onclick="clearPWACache()"><i class="fas fa-broom"></i> Cache</button>
       </div>
     </div>
     <div class="card-body">
@@ -54,11 +94,10 @@
 <!-- jQuery & DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
 <script>
-  // 🔧 Konfigurasi Firebase
+  // Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
     authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -71,7 +110,6 @@
   const app = firebase.initializeApp(firebaseConfig);
   const db = app.database();
 
-  // ===== DataTables dengan server-side Firebase =====
   let table;
   $(document).ready(() => {
     table = $('#tabelPelanggan').DataTable({
@@ -112,12 +150,12 @@
         { title: "Telepon" },
         { title: "Paket" },
         { title: "Harga" },
-        { title: "Aksi" }
+        { title: "Aksi", orderable: false }
       ]
     });
   });
 
-  // --- Import dari KML/XML ---
+  // Import dari KML
   document.getElementById("btnImport").addEventListener("click", () => {
     const fileInput = document.getElementById("fileKML");
     if (!fileInput.files.length) return alert("Pilih file terlebih dahulu!");
@@ -130,28 +168,21 @@
 
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(text, "application/xml");
-
       const placemarks = xmlDoc.getElementsByTagName("Placemark");
-      console.log("Jumlah pelanggan ditemukan:", placemarks.length);
 
-      if (placemarks.length === 0) {
-        alert("❌ Tidak ada <Placemark> ditemukan di file KML!");
-        return;
-      }
+      if (placemarks.length === 0) return alert("❌ Tidak ada <Placemark> ditemukan!");
 
       db.ref("pelanggan").once("value").then(snapshot => {
         const dataLama = snapshot.val() || {};
         const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
-        let totalBaru = 0;
-        let promises = [];
+        let totalBaru = 0, promises = [];
 
         for (let i = 0; i < placemarks.length; i++) {
           const p = placemarks[i];
           const nama = (p.getElementsByTagName("name")[0]?.textContent || "Tanpa Nama " + i).trim();
           let desc = p.getElementsByTagName("description")[0]?.textContent || "";
-          
-          // parsing deskripsi
           let alamat = "-", telepon = "-", paket = "-", harga = "0";
+
           desc.split(/\n/).forEach(line => {
             let parts = line.split(":");
             if (parts.length < 2) return;
@@ -176,11 +207,10 @@
         });
       });
     };
-
     reader.readAsText(file);
   });
 
-  // 🗑️ Reset Database
+  // Reset Database
   function resetDatabase() {
     if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
       db.ref("pelanggan").set(null).then(() => {
@@ -190,13 +220,11 @@
     }
   }
 
-  // 🗑️ Hapus duplikat
+  // Hapus duplikat
   function hapusDuplikat() {
     db.ref("pelanggan").once("value", snapshot => {
       if (!snapshot.exists()) return alert("Tidak ada data pelanggan.");
-      const data = snapshot.val();
-      const seen = {};
-      const hapusList = [];
+      const data = snapshot.val(), seen = {}, hapusList = [];
       for (let id in data) {
         let nama = (data[id].nama || "").trim().toLowerCase();
         if (seen[nama]) hapusList.push(id);
@@ -208,13 +236,13 @@
     });
   }
 
-  // 🔘 Aksi tombol dummy
+  // Aksi tombol
   function bayar(id){ alert("Bayar ID: " + id); }
   function edit(id){ alert("Edit ID: " + id); }
   function hapus(id){ if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove().then(()=>table.ajax.reload()); }
   function notif(id){ alert("Notifikasi ke ID: " + id); }
 
-  // 🧹 Clear Cache & Service Worker
+  // Clear Cache & Service Worker
   function clearPWACache() {
     if (!confirm("⚠️ Hapus semua cache & service worker PWA?")) return;
     if ('serviceWorker' in navigator) {
@@ -222,7 +250,7 @@
     }
     caches.keys().then(names => names.forEach(name => caches.delete(name)));
     localStorage.clear(); sessionStorage.clear();
-    alert("✅ Cache & Service Worker PWA dibersihkan.\nReload halaman.");
+    alert("✅ Cache & Service Worker dibersihkan.\nReload halaman.");
   }
 </script>
 </body>
