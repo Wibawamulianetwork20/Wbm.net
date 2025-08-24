@@ -16,13 +16,9 @@
     .card-body { padding: 0; }
     .card-header {
       background: linear-gradient(90deg,#0d6efd,#0dcaf0);
-      color: white;
-      font-weight: 600;
+      color: white; font-weight: 600;
       border-radius: 12px 12px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
     }
     .card-header .btn,
     .card-header input[type="file"] { margin: 4px 2px; }
@@ -31,8 +27,10 @@
     #tabelPelanggan tbody tr:hover { background: #f1f7ff; }
     #tabelPelanggan td:nth-child(5) { font-weight: bold; color: #198754; }
     .aksi-btn {
-      width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 50%; margin: 2px; font-size: 14px; color: #fff; border: none; transition: 0.2s;
+      width: 36px; height: 36px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%; margin: 2px; font-size: 14px;
+      color: #fff; border: none; transition: 0.2s;
     }
     .aksi-btn:hover { transform: scale(1.1); opacity: 0.9; }
     .aksi-btn.bayar { background: #28a745; }
@@ -85,7 +83,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
 <script>
-  // Konfigurasi Firebase
+  // 🔹 Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
     authDomain: "wibawamulianetwork.firebaseapp.com",
@@ -97,48 +95,87 @@
   };
   const app = firebase.initializeApp(firebaseConfig);
   const db = app.database();
-  const messaging = firebase.messaging();
 
-  // 🌙 Dark Mode
+  // 🔹 DataTables
+  let table;
   $(document).ready(() => {
-    const darkToggle = document.getElementById("darkToggle");
-    if (localStorage.getItem("darkmode") === "true") {
-      document.body.classList.add("dark");
-      darkToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-    darkToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      const darkOn = document.body.classList.contains("dark");
-      localStorage.setItem("darkmode", darkOn);
-      darkToggle.innerHTML = darkOn ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    table = $('#tabelPelanggan').DataTable({
+      serverSide: true,
+      processing: true,
+      pageLength: 50,
+      ajax: function(data, callback) {
+        db.ref("pelanggan").once("value").then(snapshot => {
+          let all = [];
+          snapshot.forEach(child => {
+            const d = child.val();
+            all.push([
+              d.nama || "-",
+              d.alamat || "-",
+              d.telepon || "-",
+              d.paket || "-",
+              "Rp" + (d.harga || 0),
+              `
+              <button class="aksi-btn bayar"><i class="fas fa-money-bill"></i></button>
+              <button class="aksi-btn edit"><i class="fas fa-edit"></i></button>
+              <button class="aksi-btn hapus"><i class="fas fa-trash"></i></button>
+              <button class="aksi-btn notif"><i class="fas fa-bell"></i></button>
+              `
+            ]);
+          });
+
+          callback({
+            data: all.slice(data.start, data.start + data.length),
+            recordsTotal: all.length,
+            recordsFiltered: all.length
+          });
+          document.getElementById("status").textContent = "✅ Data pelanggan dimuat.";
+        });
+      },
+      columns: [
+        { title: "Nama" },
+        { title: "Alamat" },
+        { title: "Telepon" },
+        { title: "Paket" },
+        { title: "Harga" },
+        { title: "Aksi", orderable: false }
+      ]
     });
   });
 
-  // ✅ FCM Aktifkan Notifikasi
-  document.getElementById("fcmButton").addEventListener("click", async () => {
-    try {
-      const token = await messaging.getToken({ vapidKey: "MASUKKAN_PUBLIC_VAPID_KEY_MU_DI_SINI" });
-      if (token) {
-        alert("✅ Notifikasi aktif!\nToken: " + token);
-        console.log("FCM Token:", token);
-        // Simpan token ke Firebase biar bisa kirim notifikasi
-        db.ref("tokens/" + token.slice(-10)).set({ token, time: Date.now() });
-      } else {
-        alert("❌ Tidak dapat mengambil token FCM.");
+  // 🔹 Dark Mode
+  const darkToggle = document.getElementById("darkToggle");
+  if (localStorage.getItem("darkmode") === "true") {
+    document.body.classList.add("dark");
+    darkToggle.innerHTML = '<i class="fas fa-sun"></i>';
+  }
+  darkToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    const darkOn = document.body.classList.contains("dark");
+    localStorage.setItem("darkmode", darkOn);
+    darkToggle.innerHTML = darkOn ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+  });
+
+  // 🔹 FCM (opsional, tidak blok tabel)
+  let messaging;
+  try {
+    messaging = firebase.messaging();
+    document.getElementById("fcmButton").addEventListener("click", async () => {
+      try {
+        const token = await messaging.getToken({ vapidKey: "MASUKKAN_PUBLIC_VAPID_KEY_MU" });
+        if (token) {
+          alert("✅ Notifikasi aktif!\nToken: " + token);
+          db.ref("tokens/" + token.slice(-10)).set({ token, time: Date.now() });
+        }
+      } catch (err) {
+        console.warn("FCM gagal:", err.message);
       }
-    } catch (err) {
-      console.error("FCM Error:", err);
-      alert("❌ Gagal aktifkan notifikasi.");
-    }
-  });
-
-  // Terima pesan saat tab aktif
-  messaging.onMessage(payload => {
-    console.log("Pesan masuk:", payload);
-    alert("🔔 Notifikasi: " + (payload.notification.title || "Pesan baru"));
-  });
-
-  // --- sisanya: DataTables, Import XML, Reset, dll tetap sama ---
+    });
+    messaging.onMessage(payload => {
+      alert("🔔 Notifikasi: " + (payload.notification.title || "Pesan baru"));
+    });
+  } catch(e) {
+    console.warn("FCM tidak aktif:", e.message);
+  }
 </script>
 </body>
 </html>
