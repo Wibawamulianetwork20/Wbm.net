@@ -10,107 +10,44 @@
   <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
 
   <style>
-    body {
-      background: #f8f9fa;
-      font-family: 'Segoe UI', sans-serif;
-      transition: background 0.3s, color 0.3s;
-    }
-    .container {
-      max-width: 1200px;
-    }
-    .card {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.1);
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    .card-header {
-      background: linear-gradient(90deg,#0d6efd,#0dcaf0);
-      color: white;
-      font-weight: 600;
-      border-radius: 12px 12px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .card-header .btn,
-    .card-header input[type="file"] {
-      margin: 4px 2px;
-    }
-    .card-body {
-      padding: 15px;
-    }
-    #tabelPelanggan_wrapper {
-      width: 100% !important;
-    }
-    #tabelPelanggan {
-      width: 100% !important;
-      font-size: 14px;
-      border-radius: 0 0 12px 12px;
-      overflow: hidden;
-    }
-    #tabelPelanggan tbody tr:hover {
-      background: #f1f7ff;
-    }
-    #tabelPelanggan td:nth-child(5) {
-      font-weight: bold;
-      color: #198754;
-    }
-    .aksi-btn {
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      margin: 2px;
-      font-size: 14px;
-      color: #fff;
-      border: none;
-      transition: 0.2s;
-    }
-    .aksi-btn:hover {
-      transform: scale(1.1);
-      opacity: 0.9;
-    }
+    body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+    .card-header { background: #0d6efd; color: white; font-weight: 600; }
+    .aksi-btn { border: none; border-radius: 8px; padding: 5px 10px; margin: 2px; color: white; cursor: pointer; }
     .aksi-btn.bayar { background: #28a745; }
-    .aksi-btn.edit { background: #ffc107; color: #000; }
+    .aksi-btn.edit { background: #ffc107; }
     .aksi-btn.hapus { background: #dc3545; }
     .aksi-btn.notif { background: #0dcaf0; }
-
-    /* Dark Mode */
-    body.dark { background: #121212; color: #e4e4e4; }
-    body.dark .card { background: #1e1e1e; box-shadow: none; }
-    body.dark .card-header { background: linear-gradient(90deg,#222,#444); }
-    body.dark table.dataTable { color: #e4e4e4; background: #1e1e1e; }
-    body.dark #tabelPelanggan tbody tr:hover { background: #2a2a2a; }
-    body.dark #tabelPelanggan td:nth-child(5) { color: #4ade80; }
-    body.dark .dataTables_wrapper .dataTables_filter input,
-    body.dark .dataTables_wrapper .dataTables_length select {
-      background: #2a2a2a;
-      color: #e4e4e4;
-      border: 1px solid #444;
-    }
   </style>
 </head>
 <body>
 
 <div class="container py-4">
   <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <span><i class="fas fa-users"></i> Data Pelanggan</span>
       <div>
-        <button id="darkToggle" class="btn btn-light btn-sm"><i class="fas fa-moon"></i></button>
-        <button id="fcmButton" class="btn btn-success btn-sm"><i class="fas fa-bell"></i> Aktifkan Notifikasi</button>
-        <input type="file" id="fileKML" class="form-control d-inline-block" style="width:auto;">
-        <button id="btnImport" class="btn btn-light text-primary"><i class="fas fa-file-import"></i> Import XML</button>
-        <button class="btn btn-danger btn-sm" onclick="resetDatabase()"><i class="fas fa-trash"></i> Reset</button>
+        <input type="file" id="fileKML" class="form-control mb-2" accept=".xml,.kml">
+        <button id="btnImport" class="btn btn-primary mb-3"><i class="fas fa-file-import"></i> Import XML/KML</button>
+        <button class="btn btn-danger btn-sm" onclick="resetDatabase()"><i class="fas fa-trash"></i> Reset DB</button>
+        <button class="btn btn-warning btn-sm" onclick="hapusDuplikat()"><i class="fas fa-clone"></i> Hapus Duplikat</button>
       </div>
     </div>
     <div class="card-body">
-      <table id="tabelPelanggan" class="display table table-striped w-100"></table>
+      <table id="tabelPelanggan" class="display table table-striped w-100">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Alamat</th>
+            <th>Telepon</th>
+            <th>Paket</th>
+            <th>Harga</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
       <p id="status" class="text-center text-muted mt-2">Menunggu data pelanggan...</p>
     </div>
   </div>
@@ -119,164 +56,16 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 
 <!-- jQuery & DataTables -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- togeojson & FontAwesome -->
+<script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-<script>
-  // 🔹 Konfigurasi Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBXnXCSXhy06eqWBPzYmzxCo_LBzl51DO4",
-    authDomain: "wibawamulianetwork.firebaseapp.com",
-    databaseURL: "https://wibawamulianetwork-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "wibawamulianetwork",
-    storageBucket: "wibawamulianetwork.appspot.com",
-    messagingSenderId: "605020393823",
-    appId: "1:605020393823:web:6ba8afe7e250bc004da6ea"
-  };
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = app.database();
-
-  // 🔹 DataTables
-  let table;
-  $(document).ready(() => {
-    table = $('#tabelPelanggan').DataTable({
-      serverSide: true,
-      processing: true,
-      pageLength: 50,
-      ajax: function(data, callback) {
-        db.ref("pelanggan").once("value").then(snapshot => {
-          let all = [];
-          snapshot.forEach(child => {
-            const d = child.val();
-            all.push([
-              d.nama || "-",
-              d.alamat || "-",
-              d.telepon || "-",
-              d.paket || "-",
-              "Rp" + (d.harga || 0),
-              `
-              <button class="aksi-btn bayar"><i class="fas fa-money-bill"></i></button>
-              <button class="aksi-btn edit"><i class="fas fa-edit"></i></button>
-              <button class="aksi-btn hapus"><i class="fas fa-trash"></i></button>
-              <button class="aksi-btn notif"><i class="fas fa-bell"></i></button>
-              `
-            ]);
-          });
-
-          callback({
-            data: all.slice(data.start, data.start + data.length),
-            recordsTotal: all.length,
-            recordsFiltered: all.length
-          });
-          document.getElementById("status").textContent = "✅ Data pelanggan dimuat.";
-        });
-      },
-      columns: [
-        { title: "Nama" },
-        { title: "Alamat" },
-        { title: "Telepon" },
-        { title: "Paket" },
-        { title: "Harga" },
-        { title: "Aksi", orderable: false }
-      ]
-    });
-  });
-
-  // 🔹 Import XML / KML fix
-  document.getElementById("btnImport").addEventListener("click", () => {
-    const fileInput = document.getElementById("fileKML");
-    if (!fileInput.files.length) return alert("Pilih file XML/KML terlebih dahulu!");
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    reader.onload = e => {
-      let text = e.target.result.trim();
-      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(text, "application/xml");
-      const placemarks = xmlDoc.getElementsByTagNameNS("*","Placemark");
-
-      if (placemarks.length === 0) {
-        alert("❌ Tidak ada <Placemark> ditemukan!");
-        return;
-      }
-
-      db.ref("pelanggan").once("value").then(snapshot => {
-        const dataLama = snapshot.val() || {};
-        const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
-        let totalBaru = 0, promises = [];
-
-        for (let i = 0; i < placemarks.length; i++) {
-          const nama = (placemarks[i].getElementsByTagNameNS("*","name")[0]?.textContent || "").trim();
-          if (!nama) continue;
-
-          const dataBaru = { nama, alamat:"-", telepon:"-", paket:"-", harga:"0" };
-          console.log("📌 Import:", dataBaru);
-
-          if (!namaSet.has(nama.toLowerCase())) {
-            const newRef = db.ref("pelanggan").push();
-            promises.push(newRef.set(dataBaru));
-            totalBaru++;
-          }
-        }
-
-        Promise.all(promises).then(() => {
-          alert(`✅ Import selesai! Tambahan baru: ${totalBaru}`);
-          table.ajax.reload();
-        });
-      });
-    };
-    reader.readAsText(file);
-  });
-
-  // 🔹 Dark Mode
-  const darkToggle = document.getElementById("darkToggle");
-  if (localStorage.getItem("darkmode") === "true") {
-    document.body.classList.add("dark");
-    darkToggle.innerHTML = '<i class="fas fa-sun"></i>';
-  }
-  darkToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    const darkOn = document.body.classList.contains("dark");
-    localStorage.setItem("darkmode", darkOn);
-    darkToggle.innerHTML = darkOn ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-  });
-
-  // 🔹 FCM (opsional, tidak blok tabel)
-  let messaging;
-  try {
-    messaging = firebase.messaging();
-    document.getElementById("fcmButton").addEventListener("click", async () => {
-      try {
-        const token = await messaging.getToken({ vapidKey: "MASUKKAN_PUBLIC_VAPID_KEY_MU" });
-        if (token) {
-          alert("✅ Notifikasi aktif!\nToken: " + token);
-          db.ref("tokens/" + token.slice(-10)).set({ token, time: Date.now() });
-        }
-      } catch (err) {
-        console.warn("FCM gagal:", err.message);
-      }
-    });
-    messaging.onMessage(payload => {
-      alert("🔔 Notifikasi: " + (payload.notification.title || "Pesan baru"));
-    });
-  } catch(e) {
-    console.warn("FCM tidak aktif:", e.message);
-  }
-
-  // 🔹 Service Worker
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(reg => console.log('✅ SW terdaftar:', reg.scope))
-        .catch(err => console.error('❌ SW gagal:', err));
-    });
-  }
-</script>
+<!-- Script terpisah -->
+<script src="pelanggan.js"></script>
 </body>
 </html>
