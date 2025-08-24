@@ -117,7 +117,7 @@
     });
   });
 
-  // --- Import dari XML (Wbmnet.xml) ---
+  // --- Import dari KML/XML ---
   document.getElementById("btnImport").addEventListener("click", () => {
     const fileInput = document.getElementById("fileKML");
     if (!fileInput.files.length) return alert("Pilih file terlebih dahulu!");
@@ -126,25 +126,16 @@
 
     reader.onload = e => {
       let text = e.target.result.trim();
-
-      // Hapus BOM kalau ada
-      if (text.charCodeAt(0) === 0xFEFF) {
-        text = text.slice(1);
-      }
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
 
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(text, "application/xml");
 
-      // Cari node <pelanggan> tanpa namespace & dengan namespace
-      let pelangganNodes = xmlDoc.getElementsByTagName("pelanggan");
-      if (pelangganNodes.length === 0) {
-        pelangganNodes = xmlDoc.getElementsByTagNameNS("*", "pelanggan");
-      }
+      const placemarks = xmlDoc.getElementsByTagName("Placemark");
+      console.log("Jumlah pelanggan ditemukan:", placemarks.length);
 
-      console.log("Jumlah pelanggan ditemukan:", pelangganNodes.length);
-
-      if (pelangganNodes.length === 0) {
-        alert("❌ Tidak ada <pelanggan> ditemukan di file XML!");
+      if (placemarks.length === 0) {
+        alert("❌ Tidak ada <Placemark> ditemukan di file KML!");
         return;
       }
 
@@ -154,13 +145,23 @@
         let totalBaru = 0;
         let promises = [];
 
-        for (let i = 0; i < pelangganNodes.length; i++) {
-          const p = pelangganNodes[i];
-          const nama = (p.getElementsByTagName("nama")[0]?.textContent || "Tanpa Nama " + i).trim();
-          const alamat = p.getElementsByTagName("alamat")[0]?.textContent || "-";
-          const telepon = p.getElementsByTagName("telepon")[0]?.textContent || "-";
-          const paket = p.getElementsByTagName("paket")[0]?.textContent || "-";
-          const harga = p.getElementsByTagName("harga")[0]?.textContent || "0";
+        for (let i = 0; i < placemarks.length; i++) {
+          const p = placemarks[i];
+          const nama = (p.getElementsByTagName("name")[0]?.textContent || "Tanpa Nama " + i).trim();
+          let desc = p.getElementsByTagName("description")[0]?.textContent || "";
+          
+          // parsing deskripsi
+          let alamat = "-", telepon = "-", paket = "-", harga = "0";
+          desc.split(/\n/).forEach(line => {
+            let parts = line.split(":");
+            if (parts.length < 2) return;
+            let key = parts[0].trim().toLowerCase();
+            let val = parts.slice(1).join(":").trim();
+            if (key.includes("alamat")) alamat = val;
+            if (key.includes("telepon")) telepon = val;
+            if (key.includes("paket")) paket = val;
+            if (key.includes("harga")) harga = val;
+          });
 
           if (!namaSet.has(nama.toLowerCase())) {
             const key = nama.toLowerCase().replace(/\s+/g, "_").replace(/[.#$/\[\]]/g, ""); 
@@ -170,7 +171,7 @@
         }
 
         Promise.all(promises).then(() => {
-          alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
+          alert(`✅ Import selesai! Tambahan baru: ${totalBaru}`);
           table.ajax.reload();
         });
       });
@@ -189,7 +190,7 @@
     }
   }
 
-  // 🗑️ Hapus duplikat berdasarkan nama
+  // 🗑️ Hapus duplikat
   function hapusDuplikat() {
     db.ref("pelanggan").once("value", snapshot => {
       if (!snapshot.exists()) return alert("Tidak ada data pelanggan.");
