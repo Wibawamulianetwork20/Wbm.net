@@ -125,11 +125,28 @@
     const reader = new FileReader();
 
     reader.onload = e => {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+      let text = e.target.result.trim();
 
-      // ambil semua node <pelanggan>
-      const pelangganNodes = xmlDoc.getElementsByTagName("pelanggan");
+      // Hapus BOM kalau ada
+      if (text.charCodeAt(0) === 0xFEFF) {
+        text = text.slice(1);
+      }
+
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, "application/xml");
+
+      // Cari node <pelanggan> tanpa namespace & dengan namespace
+      let pelangganNodes = xmlDoc.getElementsByTagName("pelanggan");
+      if (pelangganNodes.length === 0) {
+        pelangganNodes = xmlDoc.getElementsByTagNameNS("*", "pelanggan");
+      }
+
+      console.log("Jumlah pelanggan ditemukan:", pelangganNodes.length);
+
+      if (pelangganNodes.length === 0) {
+        alert("❌ Tidak ada <pelanggan> ditemukan di file XML!");
+        return;
+      }
 
       db.ref("pelanggan").once("value").then(snapshot => {
         const dataLama = snapshot.val() || {};
@@ -146,12 +163,8 @@
           const harga = p.getElementsByTagName("harga")[0]?.textContent || "0";
 
           if (!namaSet.has(nama.toLowerCase())) {
-            // bikin key aman untuk Firebase
-            const key = nama.toLowerCase()
-                            .replace(/\s+/g, "_")
-                            .replace(/[.#$/\[\]]/g, ""); 
-            const ref = db.ref("pelanggan/" + key);
-            promises.push(ref.set({ nama, alamat, telepon, paket, harga }));
+            const key = nama.toLowerCase().replace(/\s+/g, "_").replace(/[.#$/\[\]]/g, ""); 
+            promises.push(db.ref("pelanggan/" + key).set({ nama, alamat, telepon, paket, harga }));
             totalBaru++;
           }
         }
@@ -159,9 +172,6 @@
         Promise.all(promises).then(() => {
           alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
           table.ajax.reload();
-        }).catch(err => {
-          console.error("Gagal simpan:", err);
-          alert("❌ Gagal import data, cek console log!");
         });
       });
     };
