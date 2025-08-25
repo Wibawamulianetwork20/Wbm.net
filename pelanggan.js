@@ -45,26 +45,24 @@ function loadPelanggan() {
   });
 }
 
-// ========== Render DataTables ==========
-function renderTable(data, append=false) {
-  if (!append) table.clear();
-  data.forEach(item => {
-    table.row.add([
-      "", // nomor urut otomatis
-      item.nama,
-      item.alamat || "-",
-      item.telepon || "-",
-      item.paket || "-",
-      "Rp" + (item.harga || 0),
-      `
-      <button class="aksi-btn bayar" onclick="bayar('${item.id}')"><i class="fas fa-money-bill"></i></button>
-      <button class="aksi-btn edit" onclick="edit('${item.id}')"><i class="fas fa-edit"></i></button>
-      <button class="aksi-btn hapus" onclick="hapus('${item.id}')"><i class="fas fa-trash"></i></button>
-      <button class="aksi-btn notif" onclick="notif('${item.id}')"><i class="fas fa-bell"></i></button>
-      `
-    ]);
-  });
-  table.draw(false);
+function resetDatabase() {
+  if (confirm("Yakin ingin reset database? Semua data akan hilang!")) {
+    db.ref("pelanggan").remove().then(() => {
+      // Ambil file JSON default
+      fetch("pelanggan.json")
+        .then(res => res.json())
+        .then(data => {
+          // Simpan lagi ke Firebase
+          for (let id in data) {
+            db.ref("pelanggan").push(data[id]);
+          }
+          alert("Database berhasil direset & restore dari JSON!");
+          table.clear().draw();
+          lastKey = null;
+          loadPelanggan();
+        });
+    });
+  }
 }
 
 // ========== Utility normalisasi nama ==========
