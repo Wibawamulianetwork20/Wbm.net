@@ -67,6 +67,15 @@ function renderTable(data, append=false) {
   table.draw(false);
 }
 
+// ========== Utility normalisasi nama ==========
+function normalizeNama(nama) {
+  return (nama || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")   // rapikan spasi
+    .replace(/\./g, "");    // hapus titik
+}
+
 // ========== Import dari XML/KML ==========
 function importDariXML(file) {
   if (!file) return alert("Pilih file XML/KML terlebih dahulu!");
@@ -82,7 +91,9 @@ function importDariXML(file) {
 
       db.ref("pelanggan").once("value").then(snapshot => {
         const dataLama = snapshot.val() || {};
-        const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
+        const namaSet = new Set(
+          Object.values(dataLama).map(d => normalizeNama(d.nama))
+        );
 
         let totalBaru = 0;
         for (let i = 0; i < placemarks.length; i++) {
@@ -92,33 +103,30 @@ function importDariXML(file) {
           const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
           const coords = coordTag ? coordTag.textContent.trim().split(",") : [null, null];
 
-          if (!namaSet.has(nama.toLowerCase())) {
-            const newRef = db.ref("pelanggan").push();
+          // Normalisasi nama untuk deteksi duplikat
+          const namaNorm = normalizeNama(nama);
+
+          // Cek nama duplikat
+          if (!namaSet.has(namaNorm)) {
+            const newRef = db.ref("pelanggan").push(); // key unik
             newRef.set({
               nama,
-              alamat: "-",
+              alamat: "-",          
               telepon: "-",
               paket: "-",
               harga: 0,
               longitude: coords[0],
               latitude: coords[1]
             });
-            namaSet.add(nama.toLowerCase());
+            namaSet.add(namaNorm); // tandai sudah ada
             totalBaru++;
           }
         }
 
         alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
-
-        // Setelah impor, refresh tabel penuh
-        db.ref("pelanggan").once("value").then(snap => {
-          const allData = [];
-          snap.forEach(child => {
-            allData.push({ id: child.key, ...child.val() });
-          });
-          renderTable(allData, false);
-          document.getElementById("status").textContent = "✅ Data terbaru sudah dimuat.";
-        });
+        table.clear().draw();
+        lastKey = null;
+        loadPelanggan();
       });
     } catch (err) {
       alert("❌ Gagal memproses file XML/KML: " + err.message);
@@ -145,22 +153,35 @@ function resetDatabase() {
   }
 }
 
+// ========== Hapus duplikat berdasarkan nama normalisasi ==========
 function hapusDuplikat() {
   db.ref("pelanggan").once("value", snapshot => {
     if (!snapshot.exists()) {
       alert("Tidak ada data pelanggan.");
       return;
     }
+
     const data = snapshot.val();
     const seen = {};
     const hapusList = [];
+
     for (let id in data) {
-      let nama = (data[id].nama || "").trim().toLowerCase();
-      if (seen[nama]) hapusList.push(id);
-      else seen[nama] = true;
+      let namaNorm = normalizeNama(data[id].nama || "");
+      if (seen[namaNorm]) {
+        // Kalau sudah pernah ada nama ini → masuk daftar hapus
+        hapusList.push(id);
+      } else {
+        // Simpan yang pertama kali ditemukan
+        seen[namaNorm] = id;
+      }
     }
-    hapusList.forEach(id => db.ref("pelanggan/"+id).remove());
+
+    // Hapus semua duplikat
+    hapusList.forEach(id => db.ref("pelanggan/" + id).remove());
+
     alert(`✅ ${hapusList.length} duplikat dihapus!`);
+    table.clear().draw();
+    lastKey = null;
     loadPelanggan();
   });
 }
