@@ -13,10 +13,6 @@ const db = app.database();
 
 // ========== Variabel tabel ==========
 let table;
-let lastKey = null;
-const limit = 50;
-let loading = false;
-
 $(document).ready(() => {
   table = $('#tabelPelanggan').DataTable({
     pageLength: 25,
@@ -24,45 +20,28 @@ $(document).ready(() => {
     searching: true,
     destroy: true,
     columnDefs: [{
-      targets: 0, // Kolom pertama untuk nomor urut
+      targets: 0,
       render: function (data, type, row, meta) {
-        return meta.row + 1; // Nomor urut otomatis
+        return meta.row + 1;
       }
     }]
   });
 
   loadPelanggan();
-
-  // Infinite scroll
-  window.addEventListener("scroll", () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
-      if (!loading) loadPelanggan();
-    }
-  });
 });
 
-// ========== Load batch pelanggan ==========
+// ========== Load semua pelanggan ==========
 function loadPelanggan() {
-  loading = true;
   document.getElementById("status").textContent = "⏳ Memuat data...";
-
-  let query = db.ref('pelanggan').orderByKey().limitToFirst(limit);
-  if (lastKey) query = db.ref('pelanggan').orderByKey().startAfter(lastKey).limitToFirst(limit);
-
-  query.once('value').then(snapshot => {
+  db.ref("pelanggan").once("value").then(snapshot => {
     const data = [];
     snapshot.forEach(child => {
       data.push({ id: child.key, ...child.val() });
-      lastKey = child.key;
     });
-
-    if (data.length > 0) {
-      renderTable(data, true);
-      document.getElementById("status").textContent = "Scroll ke bawah untuk memuat lebih banyak...";
-    } else {
-      document.getElementById("status").textContent = "✅ Semua data sudah dimuat.";
-    }
-    loading = false;
+    renderTable(data, false);
+    document.getElementById("status").textContent = data.length > 0
+      ? "✅ Data pelanggan dimuat."
+      : "⚠️ Tidak ada data pelanggan.";
   });
 }
 
@@ -71,7 +50,7 @@ function renderTable(data, append=false) {
   if (!append) table.clear();
   data.forEach(item => {
     table.row.add([
-      "", // kolom nomor
+      "", // nomor urut otomatis
       item.nama,
       item.alamat || "-",
       item.telepon || "-",
@@ -87,34 +66,6 @@ function renderTable(data, append=false) {
   });
   table.draw(false);
 }
-
-// ========== Import dari pelanggan.json ==========
-function importDariJSON() {
-  fetch("pelanggan.json")
-    .then(res => res.json())
-    .then(jsonData => {
-      db.ref("pelanggan").once("value").then(snapshot => {
-        const dataLama = snapshot.val() || {};
-        const namaSet = new Set(Object.values(dataLama).map(d => (d.nama || "").toLowerCase()));
-
-        let totalBaru = 0;
-        for (let id in jsonData) {
-          const pelanggan = jsonData[id];
-          const nama = pelanggan.nama || "Tanpa Nama";
-
-          if (!namaSet.has(nama.toLowerCase())) {
-            const key = nama.toLowerCase().replace(/\s+/g, "_");
-            db.ref("pelanggan/" + key).set(pelanggan);
-            totalBaru++;
-          }
-        }
-
-        console.log(`✅ Import JSON selesai, tambahan baru: ${totalBaru}`);
-      });
-    })
-    .catch(err => console.warn("⚠️ Tidak ada pelanggan.json atau gagal baca:", err));
-}
-window.addEventListener("load", importDariJSON);
 
 // ========== Import dari XML/KML ==========
 function importDariXML(file) {
@@ -141,7 +92,6 @@ function importDariXML(file) {
           const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
           const coords = coordTag ? coordTag.textContent.trim().split(",") : [null, null];
 
-          // Cek duplikat nama
           if (!namaSet.has(nama.toLowerCase())) {
             const newRef = db.ref("pelanggan").push();
             newRef.set({
@@ -159,9 +109,16 @@ function importDariXML(file) {
         }
 
         alert(`✅ Import XML selesai! Tambahan baru: ${totalBaru}`);
-        table.clear().draw();
-        lastKey = null;
-        loadPelanggan();
+
+        // Setelah impor, refresh tabel penuh
+        db.ref("pelanggan").once("value").then(snap => {
+          const allData = [];
+          snap.forEach(child => {
+            allData.push({ id: child.key, ...child.val() });
+          });
+          renderTable(allData, false);
+          document.getElementById("status").textContent = "✅ Data terbaru sudah dimuat.";
+        });
       });
     } catch (err) {
       alert("❌ Gagal memproses file XML/KML: " + err.message);
@@ -174,11 +131,7 @@ function importDariXML(file) {
 function bayar(id){ alert("Bayar ID: " + id); }
 function edit(id){ alert("Edit ID: " + id); }
 function hapus(id){
-  if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove().then(() => {
-    table.clear().draw();
-    lastKey = null;
-    loadPelanggan();
-  });
+  if(confirm("Hapus data?")) db.ref("pelanggan/"+id).remove().then(() => loadPelanggan());
 }
 function notif(id){ alert("Notifikasi ke ID: " + id); }
 
@@ -187,8 +140,6 @@ function resetDatabase() {
   if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
     db.ref("pelanggan").set(null).then(() => {
       alert("✅ Semua data pelanggan sudah dihapus!");
-      table.clear().draw();
-      lastKey = null;
       loadPelanggan();
     });
   }
@@ -210,8 +161,6 @@ function hapusDuplikat() {
     }
     hapusList.forEach(id => db.ref("pelanggan/"+id).remove());
     alert(`✅ ${hapusList.length} duplikat dihapus!`);
-    table.clear().draw();
-    lastKey = null;
     loadPelanggan();
   });
 }
@@ -226,7 +175,7 @@ function clearPWACache() {
   alert("✅ Cache & Service Worker PWA dibersihkan.\nReload halaman.");
 }
 
-// ========== Event Listener untuk tombol Import ==========
+// ========== Event Listener tombol Import ==========
 document.addEventListener("DOMContentLoaded", () => {
   const btnImport = document.getElementById("btnImport");
   if (btnImport) {
