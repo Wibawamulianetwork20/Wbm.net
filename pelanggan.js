@@ -136,24 +136,24 @@ function importDariXML(file) {
         let totalBaru = 0;
         for (let i = 0; i < placemarks.length; i++) {
           const nameTag = placemarks[i].getElementsByTagName("name")[0];
-          const descTag = placemarks[i].getElementsByTagName("description")[0];
           const coordTag = placemarks[i].getElementsByTagName("coordinates")[0];
 
           const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
-          const alamat = descTag ? descTag.textContent.trim() : "-";
           const coords = coordTag ? coordTag.textContent.trim().split(",") : [null, null];
 
+          // Cek nama duplikat
           if (!namaSet.has(nama.toLowerCase())) {
-            const key = nama.toLowerCase().replace(/\s+/g, "_");
-            db.ref("pelanggan/" + key).set({
+            const newRef = db.ref("pelanggan").push(); // gunakan push agar key unik
+            newRef.set({
               nama,
-              alamat,
+              alamat: "-",          // default karena <description> tidak ada di XML
               telepon: "-",
               paket: "-",
               harga: 0,
               longitude: coords[0],
               latitude: coords[1]
             });
+            namaSet.add(nama.toLowerCase()); // masukkan ke set agar tidak terulang
             totalBaru++;
           }
         }
