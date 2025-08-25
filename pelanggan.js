@@ -11,8 +11,10 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const db = app.database();
 
-// ========== Variabel tabel ==========
+// ========== Variabel Global ==========
 let table;
+let lastKey = null;
+
 $(document).ready(() => {
   table = $('#tabelPelanggan').DataTable({
     pageLength: 25,
@@ -30,6 +32,28 @@ $(document).ready(() => {
   loadPelanggan();
 });
 
+// ========== Render Data ke Tabel ==========
+function renderTable(data, append = false) {
+  if (!append) table.clear();
+  data.forEach((row, idx) => {
+    table.row.add([
+      idx + 1,
+      row.nama || "-",
+      row.alamat || "-",
+      row.telepon || "-",
+      row.paket || "-",
+      row.harga || 0,
+      `
+        <button onclick="bayar('${row.id}')">Bayar</button>
+        <button onclick="edit('${row.id}')">Edit</button>
+        <button onclick="hapus('${row.id}')">Hapus</button>
+        <button onclick="notif('${row.id}')">Notif</button>
+      `
+    ]);
+  });
+  table.draw();
+}
+
 // ========== Load semua pelanggan ==========
 function loadPelanggan() {
   document.getElementById("status").textContent = "⏳ Memuat data...";
@@ -45,18 +69,17 @@ function loadPelanggan() {
   });
 }
 
+// ========== Reset Database (hapus + restore JSON default) ==========
 function resetDatabase() {
-  if (confirm("Yakin ingin reset database? Semua data akan hilang!")) {
+  if (confirm("⚠️ Semua data pelanggan akan dihapus dan diganti dari JSON default.\nLanjutkan?")) {
     db.ref("pelanggan").remove().then(() => {
-      // Ambil file JSON default
       fetch("pelanggan.json")
         .then(res => res.json())
         .then(data => {
-          // Simpan lagi ke Firebase
           for (let id in data) {
             db.ref("pelanggan").push(data[id]);
           }
-          alert("Database berhasil direset & restore dari JSON!");
+          alert("✅ Database berhasil direset & restore dari JSON!");
           table.clear().draw();
           lastKey = null;
           loadPelanggan();
@@ -101,22 +124,20 @@ function importDariXML(file) {
           const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
           const coords = coordTag ? coordTag.textContent.trim().split(",") : [null, null];
 
-          // Normalisasi nama untuk deteksi duplikat
           const namaNorm = normalizeNama(nama);
 
-          // Cek nama duplikat
           if (!namaSet.has(namaNorm)) {
-            const newRef = db.ref("pelanggan").push(); // key unik
+            const newRef = db.ref("pelanggan").push();
             newRef.set({
               nama,
-              alamat: "-",          
+              alamat: "-",
               telepon: "-",
               paket: "-",
               harga: 0,
               longitude: coords[0],
               latitude: coords[1]
             });
-            namaSet.add(namaNorm); // tandai sudah ada
+            namaSet.add(namaNorm);
             totalBaru++;
           }
         }
@@ -141,16 +162,6 @@ function hapus(id){
 }
 function notif(id){ alert("Notifikasi ke ID: " + id); }
 
-// ========== Utility ==========
-function resetDatabase() {
-  if (confirm("⚠️ Semua data pelanggan akan dihapus.\nLanjutkan reset?")) {
-    db.ref("pelanggan").set(null).then(() => {
-      alert("✅ Semua data pelanggan sudah dihapus!");
-      loadPelanggan();
-    });
-  }
-}
-
 // ========== Hapus duplikat berdasarkan nama normalisasi ==========
 function hapusDuplikat() {
   db.ref("pelanggan").once("value", snapshot => {
@@ -166,15 +177,12 @@ function hapusDuplikat() {
     for (let id in data) {
       let namaNorm = normalizeNama(data[id].nama || "");
       if (seen[namaNorm]) {
-        // Kalau sudah pernah ada nama ini → masuk daftar hapus
         hapusList.push(id);
       } else {
-        // Simpan yang pertama kali ditemukan
         seen[namaNorm] = id;
       }
     }
 
-    // Hapus semua duplikat
     hapusList.forEach(id => db.ref("pelanggan/" + id).remove());
 
     alert(`✅ ${hapusList.length} duplikat dihapus!`);
@@ -184,6 +192,7 @@ function hapusDuplikat() {
   });
 }
 
+// ========== Clear cache & Service Worker PWA ==========
 function clearPWACache() {
   if (!confirm("⚠️ Hapus semua cache & service worker PWA?")) return;
   if ('serviceWorker' in navigator) {
