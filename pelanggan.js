@@ -71,7 +71,7 @@ function renderTable(data, append=false) {
   if (!append) table.clear();
   data.forEach(item => {
     table.row.add([
-      "", // kolom nomor (akan diisi otomatis oleh DataTables)
+      "", // kolom nomor
       item.nama,
       item.alamat || "-",
       item.telepon || "-",
@@ -141,19 +141,19 @@ function importDariXML(file) {
           const nama = nameTag ? nameTag.textContent.trim() : "Tanpa Nama " + (i+1);
           const coords = coordTag ? coordTag.textContent.trim().split(",") : [null, null];
 
-          // Cek nama duplikat
+          // Cek duplikat nama
           if (!namaSet.has(nama.toLowerCase())) {
-            const newRef = db.ref("pelanggan").push(); // gunakan push agar key unik
+            const newRef = db.ref("pelanggan").push();
             newRef.set({
               nama,
-              alamat: "-",          // default karena <description> tidak ada di XML
+              alamat: "-",
               telepon: "-",
               paket: "-",
               harga: 0,
               longitude: coords[0],
               latitude: coords[1]
             });
-            namaSet.add(nama.toLowerCase()); // masukkan ke set agar tidak terulang
+            namaSet.add(nama.toLowerCase());
             totalBaru++;
           }
         }
@@ -225,3 +225,14 @@ function clearPWACache() {
   localStorage.clear(); sessionStorage.clear();
   alert("✅ Cache & Service Worker PWA dibersihkan.\nReload halaman.");
 }
+
+// ========== Event Listener untuk tombol Import ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const btnImport = document.getElementById("btnImport");
+  if (btnImport) {
+    btnImport.addEventListener("click", () => {
+      const fileInput = document.getElementById("fileKML");
+      importDariXML(fileInput.files[0]);
+    });
+  }
+});
