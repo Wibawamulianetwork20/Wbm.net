@@ -13,11 +13,52 @@
     body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     .card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
     .card-header { background: #0d6efd; color: white; font-weight: 600; }
-    .aksi-btn { border: none; border-radius: 8px; padding: 5px 10px; margin: 2px; color: white; cursor: pointer; }
+.aksi-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin: 2px;
+      color: white;
+      cursor: pointer;
+    }
     .aksi-btn.bayar { background: #28a745; }
-    .aksi-btn.edit { background: #ffc107; }
+    .aksi-btn.edit { background: #ffc107; color: black; }
     .aksi-btn.hapus { background: #dc3545; }
-    .aksi-btn.notif { background: #0dcaf0; }
+    .aksi-btn.notif { background: #17a2b8; }
+
+    /* Modal */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 9999; 
+      left: 0; top: 0; 
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center; 
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #333;
+    }
+    .modal-content h3 { margin-top: 0; text-align: center; }
+    .modal-content label { margin-top: 10px; font-weight: bold; display: block; }
+    .modal-content input {
+      width: 100%; padding: 8px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+    .modal-content .btn-save {
+      margin-top: 15px; width: 100%;
+      background: #28a745; color: white;
+      padding: 10px; border: none; border-radius: 5px; cursor: pointer;
+    }
+    .modal-content .btn-save:hover { background: #218838; }
+    .close {
+      float: right; font-size: 20px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -55,8 +96,28 @@
         </thead>
         <tbody></tbody>
       </table>
-      <p id="status" class="text-center text-muted mt-2">Menunggu data pelanggan...</p>
     </div>
+      <!-- Modal Edit -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="tutupModal()">&times;</span>
+      <h3>Edit Data Pelanggan</h3>
+      <form id="editForm" onsubmit="simpanEdit(event)">
+        <input type="hidden" id="editId">
+        <label>Nama:</label>
+        <input type="text" id="editNama" required>
+        <label>Alamat:</label>
+        <input type="text" id="editAlamat" required>
+        <label>Paket:</label>
+        <input type="text" id="editPaket" required>
+        <label>Harga:</label>
+        <input type="number" id="editHarga" required>
+        <label>Telepon:</label>
+        <input type="text" id="editTelepon" required>
+        <button type="submit" class="btn-save">💾 Simpan</button>
+      </form>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -73,6 +134,14 @@
 
 <!-- Script terpisah -->
 <script src="pelanggan.js"></script>
+
+<script>
+  // Hubungkan tombol Import ke fungsi importDariXML
+  document.getElementById("btnImport").addEventListener("click", () => {
+    const fileInput = document.getElementById("fileKML");
+    importDariXML(fileInput.files[0]);
+  });
+</script>
 
 </body>
 </html>
