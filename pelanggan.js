@@ -34,19 +34,14 @@ $(document).ready(() => {
 
 // --- Cek & Restore Data dari Firebase / JSON ---
 function cekDanRestoreData() {
-  db.ref("pelanggan").once("value", snapshot => {
-    if (snapshot.exists()) {
-      isiTabel(snapshot.val());
-    } else {
-      // fallback load dari file pelanggan.json
-      fetch("pelanggan.json")
-        .then(res => res.json())
-        .then(data => isiTabel(data))
-        .catch(err => console.error("Gagal load JSON:", err));
-    }
-  });
+  fetch("pelanggan.json")
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(data => isiTabel(data))
+    .catch(err => console.error("Gagal load JSON:", err));
 }
-
 // --- Isi tabel dengan data ---
 function isiTabel(data) {
   table.clear();
