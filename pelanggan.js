@@ -52,8 +52,9 @@ function cekDanRestoreData() {
       fetch("pelanggan.json")
         .then(res => res.json())
         .then(json => {
+          // json.pelanggan isinya { pel001: {...}, pel002: {...}, ... }
           const pelanggan = json.pelanggan || {};
-          return db.ref("pelanggan").set(pelanggan);
+          return db.ref("pelanggan").update(pelanggan);
         })
         .then(() => {
           alert("✅ Data awal berhasil di-restore dari JSON!");
