@@ -34,13 +34,18 @@ $(document).ready(() => {
 
 // --- Cek & Restore Data dari Firebase / JSON ---
 function cekDanRestoreData() {
-  fetch("pelanggan.json")
-    .then(res => {
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.json();
-    })
-    .then(data => isiTabel(data))
-    .catch(err => console.error("Gagal load JSON:", err));
+  db.ref("pelanggan").once("value", snapshot => {
+    console.log("Data dari Firebase:", snapshot.val()); // 🔎 cek data masuk
+    if (snapshot.exists()) {
+      isiTabel(snapshot.val());
+    } else {
+      console.warn("Firebase kosong, fallback ke JSON");
+      fetch("pelanggan.json")
+        .then(res => res.json())
+        .then(data => isiTabel(data))
+        .catch(err => console.error("Gagal load JSON:", err));
+    }
+  });
 }
 // --- Isi tabel dengan data ---
 function isiTabel(data) {
@@ -49,7 +54,7 @@ function isiTabel(data) {
   Object.keys(data).forEach(id => {
     const p = data[id];
     table.row.add([
-      "", // kolom No diisi otomatis
+      "", // kolom No (auto number)
       p.nama || "",
       p.alamat || "",
       p.telepon || "",
