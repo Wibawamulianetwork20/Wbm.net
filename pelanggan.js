@@ -14,7 +14,7 @@ const db = firebase.database();
 let table;
 
 $(document).ready(() => {
-  // Inisialisasi DataTable sekali saja
+  // Inisialisasi DataTable
   table = $('#tabelPelanggan').DataTable({
     pageLength: 10,
     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -29,32 +29,29 @@ $(document).ready(() => {
     }]
   });
 
-  cekDanRestoreData();
-});
-
-// --- Cek & Restore Data dari Firebase / JSON ---
-function cekDanRestoreData() {
-  db.ref("pelanggan").once("value", snapshot => {
-    console.log("Data dari Firebase:", snapshot.val()); // 🔎 cek data masuk
+  // Load data realtime dari Firebase
+  db.ref("pelanggan").on("value", snapshot => {
     if (snapshot.exists()) {
       isiTabel(snapshot.val());
     } else {
-      console.warn("Firebase kosong, fallback ke JSON");
-      fetch("pelanggan.json")
-        .then(res => res.json())
-        .then(data => isiTabel(data))
-        .catch(err => console.error("Gagal load JSON:", err));
+      table.clear().draw();
     }
   });
-}
+
+  // Hubungkan tombol Import
+  $("#btnImport").on("click", () => {
+    const file = document.getElementById("fileKML").files[0];
+    importDariXML(file);
+  });
+});
+
 // --- Isi tabel dengan data ---
 function isiTabel(data) {
   table.clear();
-
   Object.keys(data).forEach(id => {
     const p = data[id];
     table.row.add([
-      "", // kolom No (auto number)
+      "", // auto number
       p.nama || "",
       p.alamat || "",
       p.telepon || "",
@@ -68,7 +65,6 @@ function isiTabel(data) {
       `
     ]);
   });
-
   table.draw(false);
 }
 
@@ -84,7 +80,6 @@ function editPelanggan(id) {
     document.getElementById("editPaket").value = data.paket;
     document.getElementById("editHarga").value = data.harga;
     document.getElementById("editTelepon").value = data.telepon;
-
     document.getElementById("editModal").style.display = "flex";
   });
 }
@@ -103,16 +98,13 @@ function simpanEdit(e) {
     harga: document.getElementById("editHarga").value,
     telepon: document.getElementById("editTelepon").value
   };
-  db.ref("pelanggan/" + id).update(updated, () => {
-    tutupModal();
-    cekDanRestoreData();
-  });
+  db.ref("pelanggan/" + id).update(updated, () => tutupModal());
 }
 
 // --- Hapus Data ---
 function hapusPelanggan(id) {
   if (confirm("Yakin ingin menghapus pelanggan ini?")) {
-    db.ref("pelanggan/" + id).remove(() => cekDanRestoreData());
+    db.ref("pelanggan/" + id).remove();
   }
 }
 
@@ -121,12 +113,11 @@ function bayarPelanggan(id) {
   db.ref("pelanggan/" + id).once("value").then(snapshot => {
     const data = snapshot.val();
     if (!data) return;
-
     db.ref("pelanggan_lunas/" + id).set({
       ...data,
       tanggalLunas: new Date().toISOString()
     });
-    db.ref("pelanggan/" + id).remove(() => cekDanRestoreData());
+    db.ref("pelanggan/" + id).remove();
   });
 }
 
@@ -138,7 +129,6 @@ function kirimNotif(id) {
 // --- Import dari XML/KML ---
 function importDariXML(file) {
   if (!file) return alert("Pilih file XML/KML dulu!");
-
   const reader = new FileReader();
   reader.onload = e => {
     const parser = new DOMParser();
@@ -151,7 +141,6 @@ function importDariXML(file) {
         nama, alamat: "-", telepon: "-", paket: "-", harga: "-"
       });
     }
-    cekDanRestoreData();
   };
   reader.readAsText(file);
 }
@@ -159,11 +148,11 @@ function importDariXML(file) {
 // --- Reset Database ---
 function resetDatabase() {
   if (confirm("Hapus semua data pelanggan?")) {
-    db.ref("pelanggan").remove(() => cekDanRestoreData());
+    db.ref("pelanggan").remove();
   }
 }
 
-// --- Hapus Duplikat (berdasarkan nama+telepon) ---
+// --- Hapus Duplikat ---
 function hapusDuplikat() {
   db.ref("pelanggan").once("value", snapshot => {
     if (!snapshot.exists()) return;
@@ -177,7 +166,6 @@ function hapusDuplikat() {
         seen[key] = true;
       }
     });
-    cekDanRestoreData();
   });
 }
 
