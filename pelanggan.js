@@ -206,24 +206,19 @@ function importDariXML(file) {
 
 // ================== Init DataTables ==================
 $(document).ready(() => {
-  table = $('#tabelPelanggan').DataTable({
-    pageLength: 25,
-    ordering: false,
-    searching: true,
-    destroy: true,
-    columnDefs: [{
-      targets: 0,
-      render: function (data, type, row, meta) {
-        return meta.row + 1;
-      }
-    }]
-  });
-
-  // Tutup modal jika klik di luar konten
-  window.addEventListener("click", e => {
-    const modal = document.getElementById("editModal");
-    if (e.target === modal) tutupModal();
-  });
+  $('#tabelPelanggan').DataTable({
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+      searching: true,
+      ordering: false,
+      destroy: true,
+      columnDefs: [{
+        targets: 0,
+        render: function (data, type, row, meta) {
+          return meta.row + 1;
+        }
+      }]
+    });
 
   cekDanRestoreData();
 });
