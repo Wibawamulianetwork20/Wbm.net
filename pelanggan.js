@@ -113,11 +113,9 @@ function bayarPelanggan(id) {
   db.ref("pelanggan/" + id).once("value").then(snapshot => {
     const data = snapshot.val();
     if (!data) return;
-    db.ref("pelanggan_lunas/" + id).set({
-      ...data,
-      tanggalLunas: new Date().toISOString()
-    });
-    db.ref("pelanggan/" + id).remove();
+
+    // Buka halaman payment dengan query string
+    window.location.href = `Payment.html?id=${id}`;
   });
 }
 
