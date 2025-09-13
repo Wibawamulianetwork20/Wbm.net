@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pakardigital - Payment Gateway</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <!-- Tambahkan Firebase SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
@@ -14,12 +14,12 @@
     <h1 class="text-2xl font-bold text-center text-blue-700 mb-4">Pakardigital Payment</h1>
     <form id="invoiceForm" class="space-y-4">
       <div>
-        <label class="block text-gray-700">Nama Customer</label>
+        <label class="block text-gray-700">Nama</label>
         <input type="text" name="nama" required class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
       </div>
       <div>
-        <label class="block text-gray-700">Email</label>
-        <input type="email" name="email" required class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
+        <label class="block text-gray-700">Paket</label>
+        <input type="text" name="paket" required class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
       </div>
       <div>
         <label class="block text-gray-700">Nominal (Rp)</label>
@@ -72,6 +72,7 @@
       const data = snapshot.val();
       if (data) {
         document.querySelector('input[name="nama"]').value = data.nama || "";
+        document.querySelector('input[name="paket"]').value = data.paket || "";
         document.querySelector('input[name="nominal"]').value = data.harga || "";
       }
     }).catch(err => console.error("Gagal ambil data:", err));
@@ -92,7 +93,7 @@
     if (idPelanggan) {
       db.ref("pelanggan_lunas/" + idPelanggan).set({
         nama: document.querySelector('input[name="nama"]').value,
-        email: document.querySelector('input[name="email"]').value,
+        paket: document.querySelector('input[name="paket"]').value,
         harga: document.querySelector('input[name="nominal"]').value,
         metode: document.querySelector('select[name="metode"]').value,
         tanggalLunas: new Date().toISOString()
@@ -106,7 +107,7 @@
   document.getElementById('invoiceForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const nama = this.nama.value;
-    const email = this.email.value;
+    const paket = this.paket.value;
     const nominal = this.nominal.value;
     const metode = this.metode.value;
 
@@ -114,7 +115,7 @@
     document.getElementById('uploadSection').classList.remove('hidden');
     document.getElementById('invoiceDetail').innerHTML = `
       <strong>Nama:</strong> ${nama}<br>
-      <strong>Email:</strong> ${email}<br>
+      <strong>Paket:</strong> ${paket}<br>
       <strong>Nominal:</strong> Rp ${parseInt(nominal).toLocaleString()}<br>
       <strong>Metode:</strong> ${metode}
     `;
